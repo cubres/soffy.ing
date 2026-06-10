@@ -75,7 +75,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-serif: var(--font-ibm-plex-serif);
   --font-mono: var(--font-geist-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -121,5 +122,13 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  ::selection {
+    color: #000000;
+    background: #b5d1b1;
+  }
+  ::-moz-selection {
+    color: #000000;
+    background: #b5d1b1;
   }
 }

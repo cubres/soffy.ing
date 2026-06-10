@@ -1,6 +1,21 @@
 import type React from "react"
 import type { Metadata } from "next"
+import { IBM_Plex_Serif, IBM_Plex_Sans } from "next/font/google"
 import "./globals.css"
+
+const ibmPlexSerif = IBM_Plex_Serif({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-ibm-plex-serif",
+})
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-ibm-plex-sans",
+})
 
 export const metadata: Metadata = {
   title: "soffy.ing",
@@ -19,13 +34,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/computer-modern@0.1.2/cmu-serif.min.css" />
-      </head>
-      <body style={{ fontFamily: "'Computer Modern Serif', serif" }}>
-        {children}
-      </body>
+    <html lang="en" className={`${ibmPlexSerif.variable} ${ibmPlexSans.variable}`}>
+      <body className="font-serif">{children}</body>
     </html>
   )
 }

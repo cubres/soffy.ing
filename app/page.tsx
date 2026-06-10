@@ -218,7 +218,6 @@ export default function WritingApp() {
   const [isPaused, setIsPaused] = useState(false)
   const [deletedText, setDeletedText] = useState("")
   const [restoreClicks, setRestoreClicks] = useState(0)
-  const [notes, setNotes] = useState("")
   const [showRestoreButton, setShowRestoreButton] = useState(false)
   const [customTimer, setCustomTimer] = useState("30")
   const [isTimerLocked, setIsTimerLocked] = useState(false)
@@ -312,17 +311,6 @@ export default function WritingApp() {
       }
     }
   }, [isPaused, shutdownTime, text])
-
-  useEffect(() => {
-    const savedNotes = localStorage.getItem("soffy-notes")
-    if (savedNotes) {
-      setNotes(savedNotes)
-    }
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem("soffy-notes", notes)
-  }, [notes])
 
   const handleTextChange = () => {
     setText(editorRef.current?.innerHTML || "")
@@ -545,26 +533,23 @@ export default function WritingApp() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white font-serif p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-[#cccccc] font-serif p-4">
       <div className="w-[170px] h-[170px] mb-4 flex items-center justify-center">
         <img src="/images/camus.png" alt="Camus" className="h-[170px] object-contain" />
       </div>
 
-      <h1 className="text-2xl mb-2">
+      <h1 className="font-sans text-2xl mb-2">
         <a href="https://soffy.ing" className="text-red-600 underline hover:text-red-500 transition-colors">
           soffy.ing
         </a>
       </h1>
 
-      <nav className="flex gap-6 mb-4 text-sm">
+      <nav className="font-sans flex gap-6 mb-4 text-sm">
         <a href="/" className="text-white underline">
           write
         </a>
-        <a href="/about" className="text-zinc-400 hover:text-white transition-colors">
+        <a href="/about" className="text-zinc-400 hover:text-[#B5D1B1] transition-colors">
           about
-        </a>
-        <a href="/test-bg" className="text-zinc-400 hover:text-white transition-colors">
-          test (BG)
         </a>
       </nav>
 
@@ -598,7 +583,7 @@ export default function WritingApp() {
       </div>
 
       {!isPaused && (
-        <div className="w-full max-w-6xl mb-2 flex gap-4">
+        <div className="w-full max-w-3xl mb-2 flex gap-4">
           <button
             onClick={applyBold}
             className="text-zinc-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
@@ -615,7 +600,7 @@ export default function WritingApp() {
       )}
 
       {!isPaused && (
-        <div className="w-full max-w-6xl flex gap-4 mb-8">
+        <div className="w-full max-w-3xl flex gap-4 mb-8">
           <div
             ref={editorRef}
             contentEditable
@@ -624,15 +609,8 @@ export default function WritingApp() {
             onPaste={handlePaste}
             data-placeholder={placeholderQuote}
             style={{ color: "#ffffff" }}
-            className="flex-[2] h-[55vh] bg-black text-base p-4 border border-zinc-700 resize-none focus:outline-none focus:border-zinc-500 overflow-auto empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-500 empty:before:italic"
+            className="w-full h-[55vh] bg-black text-base p-4 border border-zinc-700 resize-none focus:outline-none focus:border-zinc-500 overflow-auto empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-500 empty:before:italic"
           />
-          <div className="flex-1 flex flex-col">
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="flex-1 bg-black text-white text-sm p-3 border border-zinc-700 resize-none focus:outline-none focus:border-zinc-500"
-            />
-          </div>
         </div>
       )}
 
@@ -646,22 +624,22 @@ export default function WritingApp() {
             </span>
           )}
         </div>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 font-sans">
           <button
             onClick={handleImportRTF}
-            className="text-zinc-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none underline"
+            className="text-zinc-400 hover:text-[#B5D1B1] transition-colors cursor-pointer bg-transparent border-none underline"
           >
             [Import .rtf]
           </button>
           <button
             onClick={handleDownload}
-            className="text-zinc-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none underline"
+            className="text-zinc-400 hover:text-[#B5D1B1] transition-colors cursor-pointer bg-transparent border-none underline"
           >
             [Download .rtf]
           </button>
           <button
             onClick={handleDownloadPDF}
-            className="text-zinc-400 hover:text-white transition-colors cursor-pointer bg-transparent border-none underline"
+            className="text-zinc-400 hover:text-[#B5D1B1] transition-colors cursor-pointer bg-transparent border-none underline"
           >
             [Download .pdf]
           </button>
