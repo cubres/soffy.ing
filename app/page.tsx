@@ -626,18 +626,18 @@ export default function WritingApp() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-[#cccccc] font-serif p-4">
+    <div className="flex flex-col items-center justify-center h-screen overflow-hidden bg-black text-[#cccccc] font-serif p-4">
       <div className="w-[170px] h-[170px] mb-4 flex items-center justify-center">
         <img src="/images/camus.png" alt="Camus" className="h-[170px] object-contain" />
       </div>
 
-      <h1 className="font-sans text-2xl mb-2">
+      <h1 className="text-2xl mb-2">
         <a href="https://soffy.ing" className="text-red-600 underline hover:text-red-500 transition-colors">
           soffy.ing
         </a>
       </h1>
 
-      <nav className="font-sans flex gap-6 mb-4 text-sm">
+      <nav className="flex gap-6 mb-4 text-sm">
         <a href="/" className="text-white underline">
           write
         </a>
