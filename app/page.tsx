@@ -412,6 +412,106 @@ export default function WritingApp() {
     }
   }
 
+  const rtfToHtml = (rtf: string): string => {
+    let i = 0
+    const len = rtf.length
+    // Stack of formatting states; each entry tracks bold/italic for that group
+    const stack: { bold: boolean; italic: boolean }[] = [{ bold: false, italic: false }]
+    let html = ""
+    let openTags: string[] = []
+
+    const escapeHtml = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+
+    const current = () => stack[stack.length - 1]
+
+    const syncTags = () => {
+      // Close any open tags, then reopen based on current state
+      while (openTags.length) {
+        html += `</${openTags.pop()}>`
+      }
+      if (current().bold) {
+        html += "<b>"
+        openTags.push("b")
+      }
+      if (current().italic) {
+        html += "<i>"
+        openTags.push("i")
+      }
+    }
+
+    while (i < len) {
+      const ch = rtf[i]
+
+      if (ch === "{") {
+        // Push a copy of current state
+        stack.push({ ...current() })
+        i++
+      } else if (ch === "}") {
+        if (stack.length > 1) stack.pop()
+        syncTags()
+        i++
+      } else if (ch === "\\") {
+        i++
+        const next = rtf[i]
+        // Escaped literal characters
+        if (next === "\\" || next === "{" || next === "}") {
+          html += escapeHtml(next)
+          i++
+          continue
+        }
+        // Hex escape \'xx
+        if (next === "'") {
+          const hex = rtf.substr(i + 1, 2)
+          const code = Number.parseInt(hex, 16)
+          if (!Number.isNaN(code)) html += escapeHtml(String.fromCharCode(code))
+          i += 3
+          continue
+        }
+        // Control word: letters followed by optional number
+        const match = /^([a-zA-Z]+)(-?\d+)?/.exec(rtf.slice(i))
+        if (match) {
+          const word = match[1]
+          const param = match[2]
+          i += match[0].length
+          // Skip a single trailing space delimiter
+          if (rtf[i] === " ") i++
+
+          if (word === "b") {
+            current().bold = param !== "0"
+            syncTags()
+          } else if (word === "i") {
+            current().italic = param !== "0"
+            syncTags()
+          } else if (word === "par" || word === "line") {
+            // Close tags, add break, reopen
+            while (openTags.length) html += `</${openTags.pop()}>`
+            html += "<br>"
+            if (current().bold) {
+              html += "<b>"
+              openTags.push("b")
+            }
+            if (current().italic) {
+              html += "<i>"
+              openTags.push("i")
+            }
+          }
+          // Ignore all other control words (font tables, colors, etc.)
+        } else {
+          i++
+        }
+      } else if (ch === "\r" || ch === "\n") {
+        i++
+      } else {
+        html += escapeHtml(ch)
+        i++
+      }
+    }
+
+    while (openTags.length) html += `</${openTags.pop()}>`
+    return html.trim()
+  }
+
   const handleImportRTF = () => {
     const input = document.createElement("input")
     input.type = "file"
@@ -421,24 +521,17 @@ export default function WritingApp() {
       if (!file) return
 
       const text = await file.text()
-      let htmlContent = text
+      let htmlContent = ""
 
-      // Basic RTF to HTML conversion
-      if (file.name.endsWith(".rtf")) {
-        // Remove RTF header and footer
+      if (file.name.toLowerCase().endsWith(".rtf")) {
+        htmlContent = rtfToHtml(text)
+      } else {
+        // Plain text: escape and convert newlines to <br>
         htmlContent = text
-          .replace(/^\{\\rtf1[^}]*\}?\s*/i, "")
-          .replace(/\}$/g, "")
-          // Convert bold
-          .replace(/\{\\b\s*([^}]*)\}/g, "<b>$1</b>")
-          // Convert italic
-          .replace(/\{\\i\s*([^}]*)\}/g, "<i>$1</i>")
-          // Convert line breaks
-          .replace(/\\par\s*/g, "<br>")
-          // Remove other RTF codes
-          .replace(/\\[a-z]+\d*\s*/gi, "")
-          .replace(/\{|\}/g, "")
-          .trim()
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\r?\n/g, "<br>")
       }
 
       if (editorRef.current) {
