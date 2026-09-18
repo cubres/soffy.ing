@@ -1,15 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: true,
-  },
- 
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Both database drivers are loaded at runtime from node_modules, never bundled.
+  serverExternalPackages: ["@electric-sql/pglite", "postgres"],
+  poweredByHeader: false,
 }
 
 export default nextConfig

@@ -1,122 +1,164 @@
-// Utility functions for managing quotes and calendar
+// The weekly quotes: every topic set at the International Philosophy Olympiad, 1993 to 2025.
+// The order is a fixed shuffle so that week N always gets the same quote on every server.
+// To add a quote, append an object with a new id; existing ids must never change, because posts point at them.
 
 export interface Quote {
+  id: string
+  year: number
+  place: string
   text: string
-  author?: string
+  author: string
+  source: string
 }
 
-let cachedQuotes: Quote[] | null = null
+export const QUOTES: Quote[] = [
+  { id: "2014-2", year: 2014, place: "Lithuania", text: "If expert forgeries are indistinguishable from genuine works of art, and give us all the aesthetic satisfaction we can ever get, why should we not be completely satisfied with a forgery?", author: "Aline B. Saarinen", source: "Article on art forgeries" },
+  { id: "2019-4", year: 2019, place: "Italy", text: "Every reading is also a mis‑reading, a re‑interpretation, a partial interpretation, an imposed interpretation … just as the world fell apart, so is the text always already entangled in practices and hopes that make contradictory claims upon it.", author: "Donna J. Haraway", source: "Simians, Cyborgs, and Women: The Reinvention of Nature (1991)" },
+  { id: "2025-3", year: 2025, place: "Italy", text: "Thus to speak a language is to commit ourselves to the double indeterminacy due to our reliance both on its formalism and on our own continued reconsideration of this formalism in its bearing on experience …", author: "Michael Polanyi", source: "Personal Knowledge: Towards a Post-Critical Philosophy (1958/2015)" },
+  { id: "1996-3", year: 1996, place: "Turkey", text: "The limits of your language are the limits of your world.", author: "Ludwig Wittgenstein", source: "Tractatus Logico‑Philosophicus" },
+  { id: "1998-1", year: 1998, place: "Romania", text: "Tatsächlich haben wir zwei Arten von Moral nebeneinander: eine, die wir predigen, aber nicht praktizieren, und eine andere, die wir praktizieren, aber selten predigen (We actually have two kinds of morality side by side: one we preach but do not practice, and another we practice but seldom preach).", author: "Bertrand Russell", source: "The Conquest of Happiness / Human Society in Ethics and Politics" },
+  { id: "2007-1", year: 2007, place: "Turkey", text: "It follows from the foundation of the state: the ultimate aim of government is not to rule or restrain by fear or to exact obedience, but to free every man from fear … to strengthen his natural right to exist and work without injury to himself and others.", author: "Baruch Spinoza", source: "Theological‑Political Treatise, ch. XX" },
+  { id: "2005-3", year: 2005, place: "Poland", text: "Hedonism, pessimism, utilitarianism, eudemonism – all these systems that measure the value of things by pleasure or pain are superficial. Anyone conscious of creative power and an artist’s conscience can only look at them with irony and pity from a distance.", author: "Friedrich Nietzsche", source: "Beyond Good and Evil, aphorism 225" },
+  { id: "2020-4", year: 2020, place: "Slovenia", text: "We have to entertain the possibility that there is no reason for something existing; or that the split between subject and object is only our name for something equally accidental … an order absolutely indifferent to our existence.", author: "Eugene Thacker", source: "In the Dust of This Planet: Horror of Philosophy vol. 1 (2011)" },
+  { id: "1998-2", year: 1998, place: "Romania", text: "Wir sehen die Welt so, wie wir sie sehen wollen (We see the world the way we want to see it).", author: "Arthur Schopenhauer", source: "Parerga and Paralipomena" },
+  { id: "1999-4", year: 1999, place: "Hungary", text: "Is knowledge power?", author: "Question", source: "IPO topic question" },
+  { id: "2001-3", year: 2001, place: "USA", text: "I just had to consult myself about what I want to do; everything I feel to be good is good, everything I feel to be bad is bad.", author: "Jean‑Jacques Rousseau", source: "Emile or On Education (approx.)" },
+  { id: "1995-3", year: 1995, place: "Bulgaria", text: "Should we start from the premise that one is totally forbidden to do injustice, or should we consider that under some circumstances it is permitted?", author: "Plato", source: "Republic / Crito" },
+  { id: "1994-2", year: 1994, place: "Bulgaria", text: "Wo ist die Zeit geblieben? Bin ich nicht in einen tiefen Brunnen gefallen? Die Welt schläft. (Where has the time gone? Have I not fallen into a deep well? The world sleeps.)", author: "Friedrich Nietzsche", source: "Thus Spoke Zarathustra / aphorism" },
+  { id: "2016-3", year: 2016, place: "Belgium", text: "Philosophers have only interpreted the world differently; the point, however, is to change it.", author: "Karl Marx", source: "Theses on Feuerbach, XI" },
+  { id: "2005-4", year: 2005, place: "Poland", text: "Language is a labyrinth of paths. You approach from one side and know your way about; you approach the same place from another side and no longer know your way about.", author: "Ludwig Wittgenstein", source: "Philosophical Investigations §203" },
+  { id: "2018-1", year: 2018, place: "Montenegro", text: "Images belong to the rational soul in the manner of perceptions; and whenever it affirms or denies that something is good or bad, it pursues or avoids. Consequently, the soul never thinks without an image.", author: "Aristotle", source: "De Anima III,7, 431a 14–17" },
+  { id: "1997-1", year: 1997, place: "Poland", text: "Is philosophy a science?", author: "Question", source: "IPO topic question" },
+  { id: "1999-1", year: 1999, place: "Hungary", text: "It is impossible to conceive anything at all in the world, or even out of it, which can be taken as good without qualification, except a good will.", author: "Immanuel Kant", source: "Groundwork of the Metaphysics of Morals" },
+  { id: "1993-2", year: 1993, place: "Bulgaria", text: "Children are antiquities.", author: "Gaston Bachelard", source: "Fragments" },
+  { id: "2012-2", year: 2012, place: "Norway", text: "Most evil is done by people who never decide to be good or evil.", author: "Hannah Arendt", source: "Collected Works" },
+  { id: "2020-2", year: 2020, place: "Slovenia", text: "Know that philosophy is able to perfect the human soul by bringing it to know the reality of existents according to their proper essences …", author: "Mulla Sadrā", source: "The Transcendent Philosophy of the Four Journeys of the Intellect" },
+  { id: "2000-2", year: 2000, place: "Germany", text: "The passing from the state of nature to civil society produces a remarkable change in man: it puts justice as a rule of conduct in the place of instinct and gives his actions the moral quality they previously lacked.", author: "Jean‑Jacques Rousseau", source: "The Social Contract" },
+  { id: "2019-2", year: 2019, place: "Italy", text: "Who sees inaction in action and action in inaction is wise among people; he acts with complete detachment, abandoning attachment to the fruits of action … he is always satisfied and dependent on nothing.", author: "Bhagavad‑Gītā", source: "Bhagavad‑Gītā 4:18‑20" },
+  { id: "2003-1", year: 2003, place: "Argentina", text: "The laws of conscience, which we pretend to be derived from nature, proceed from custom.", author: "Michel de Montaigne", source: "Essais (1595)" },
+  { id: "2019-3", year: 2019, place: "Italy", text: "The painter who simply through practice and the judgment of his eye makes copies is like a mirror that reproduces every object placed in front of it without being aware of them.", author: "Leonardo da Vinci", source: "Codex Atlanticus" },
+  { id: "2019-1", year: 2019, place: "Italy", text: "Polus: ‘So you would prefer to suffer injustice rather than commit it?’ – Socrates: ‘In truth, I would neither, but if I must choose, I would prefer to suffer injustice than to commit it.’", author: "Plato", source: "Gorgias [469b–c]" },
+  { id: "1998-4", year: 1998, place: "Romania", text: "Übrigens ist mir alles verhaßt, was mich bloß belehrt, ohne meine Tätigkeit zu vermehren oder unmittelbar zu beleben (Incidentally, I detest all that merely instructs me without increasing my activity or directly invigorating it).", author: "Johann Wolfgang von Goethe", source: "Goethe’s Selected Works" },
+  { id: "2011-3", year: 2011, place: "Austria", text: "Thus the distinct boundaries and offices of reason and of taste are easily ascertained … reason conveys knowledge of truth and falsehood; taste gives the sentiment of beauty and deformity, vice and virtue …", author: "David Hume", source: "An Enquiry concerning the Principles of Morals" },
+  { id: "1994-1", year: 1994, place: "Bulgaria", text: "Der Mensch ist für den Menschen ein ‘Gott’ (Man is for man a ‘god’).", author: "Benedictus Spinoza", source: "Ethics" },
+  { id: "1993-4", year: 1993, place: "Bulgaria", text: "Without ‘now’ there wouldn’t be time and without time there wouldn’t be ‘now’.", author: "Aristotle", source: "Physics" },
+  { id: "2024-1", year: 2024, place: "Finland", text: "At times the truth shines so brilliantly that we perceive it as clear as day. Matter and habit then draw a veil over our perception, and we return to a darkness almost as dense as before. We are like those who, though beholding frequent flashes of lightning, still find themselves in the thickest darkness of the night.", author: "Moses Maimonides", source: "The Guide for the Perplexed (ca. 1190) – transl. Friedländer" },
+  { id: "2014-3", year: 2014, place: "Lithuania", text: "Plato argued that knowledge is true belief based on argument; Edmund Gettier asked: Is justified true belief knowledge?", author: "Plato / Edmund Gettier", source: "Theaetetus / Gettier’s paper" },
+  { id: "1995-1", year: 1995, place: "Bulgaria", text: "Everyone is someone else and no one is himself.", author: "Martin Heidegger", source: "Being and Time (interpreted)" },
+  { id: "2024-3", year: 2024, place: "Finland", text: "What is the status of citizenship today, in a world of increasingly deterritorialized politics? How is citizenship being reconfigured under contemporary conditions? How has the fraying of the four functions of the state – territoriality, administrative control, democratic legitimacy, and cultural identity – affected the theory and practice of citizenship?", author: "Seyla Benhabib", source: "The Rights of Others (2004)" },
+  { id: "2000-1", year: 2000, place: "Germany", text: "Time is not something which exists of itself; time is therefore a purely subjective condition of human intuition and in itself, apart from the subject, it is nothing.", author: "Immanuel Kant", source: "Critique of Pure Reason" },
+  { id: "1995-4", year: 1995, place: "Bulgaria", text: "To be a philosopher means to travel all the time; questions in philosophy are more essential than answers.", author: "Karl Jaspers", source: "Philosophy (3 volumes)" },
+  { id: "2023-1", year: 2023, place: "Greece", text: "We ought to be grateful to Plato … but more to the truth; so truth should be more highly esteemed than Plato.", author: "Al-Kindī (philosopher)", source: "Quoted in the topics (translation)" },
+  { id: "1999-3", year: 1999, place: "Hungary", text: "What we call ‘laws’ are hypotheses or conjectures which always form a part of some larger system of theories and therefore can never be tested in isolation.", author: "Karl R. Popper", source: "The Logic of Scientific Discovery" },
+  { id: "2003-3", year: 2003, place: "Argentina", text: "The existence of this inclination to aggression, which we can detect in ourselves and assume to be present in others, is the factor that disturbs our relations with our neighbour and forces civilisation into such a high expenditure of energy.", author: "Sigmund Freud", source: "Civilisation and its Discontents" },
+  { id: "2000-3", year: 2000, place: "Germany", text: "A process which led from the amoeba to man appeared to philosophers to be obviously a progress – though whether the amoeba would agree with this opinion is not known.", author: "Bertrand Russell", source: "Human Knowledge: Its Scope and Limits (paraphrased)" },
+  { id: "2007-4", year: 2007, place: "Turkey", text: "Justice is regarded as the highest of all virtues… it is complete virtue and excellence because he who possesses it can make use of his virtue not only for himself but also in relation to his fellow men.", author: "Aristotle", source: "Nicomachean Ethics" },
+  { id: "2011-1", year: 2011, place: "Austria", text: "He who learns but does not think is lost; he who thinks but does not learn is in danger.", author: "Confucius", source: "Analects 2.15" },
+  { id: "1996-1", year: 1996, place: "Turkey", text: "Nothing is true, everything is permitted …", author: "Friedrich Nietzsche (or Hassan‑i‑Sabbah)", source: "Often attributed to Nietzsche" },
+  { id: "2004-2", year: 2004, place: "South Korea", text: "The will to truth requires critique; the value of truth must for once, by way of experiment, be called into question.", author: "Friedrich Nietzsche", source: "On the Genealogy of Morals" },
+  { id: "1994-3", year: 1994, place: "Bulgaria", text: "Wenn Beine und Arme einen eigenen Willen hätten, wären sie nicht Glieder geblieben (If legs and arms had a will of their own, they would no longer remain limbs).", author: "Blaise Pascal", source: "Pensées" },
+  { id: "2020-1", year: 2020, place: "Slovenia (online)", text: "If the social reality is organized around the cute/dork dichotomy … we seem to be able to generate a contradiction: it is true that p so you should believe p; but believing p makes it true … so you shouldn’t believe p.", author: "Sally Haslanger", source: "‘But mom, crop-tops are cute!’ Social knowledge, social structure and ideology critique (2007)" },
+  { id: "2016-2", year: 2016, place: "Belgium", text: "For a large class of cases of the use of the word ‘meaning’ – though not for all – this word may be explained thus: the meaning of a word is its use in the language.", author: "Ludwig Wittgenstein", source: "Philosophical Investigations §43" },
+  { id: "2009-4", year: 2009, place: "Finland", text: "It is not just the existence of God, but rather the very coherence of the idea of God, that is problematic.", author: "Question (philosophy of religion)", source: "IPO topic question" },
+  { id: "2011-4", year: 2011, place: "Austria", text: "Art is not a copy of the real world. One of the damn things is enough.", author: "Nelson Goodman", source: "Languages of Art (1976)" },
+  { id: "2015-3", year: 2015, place: "Estonia", text: "Thoughts are neither external things nor representations; we must recognize a third realm … thoughts are true or false; they cannot be representations which require a subject.", author: "Gottlob Frege", source: "On Sense and Reference" },
+  { id: "2002-3", year: 2002, place: "Japan", text: "To be able to say that a point is black or white, I must first know under what conditions a point is called white or black; in order to say ‘p’ is true (or false), I must have determined under what conditions I call ‘p’ true, and thereby determine the sense of the proposition.", author: "Ludwig Wittgenstein", source: "Tractatus Logico‑Philosophicus" },
+  { id: "2012-4", year: 2012, place: "Norway", text: "Questioning whether something is as it appears concerns the judgment about the appearance, not the appearance itself – e.g., honey appears sweet but might not be sweet in itself.", author: "Sextus Empiricus", source: "Outlines of Pyrrhonism" },
+  { id: "2001-2", year: 2001, place: "USA", text: "If we extend unlimited tolerance even to those who are intolerant … then the tolerant will be destroyed, and tolerance with them.", author: "Karl R. Popper", source: "The Open Society and Its Enemies (1945)" },
+  { id: "2007-2", year: 2007, place: "Turkey", text: "There are two things that fill the mind with ever new and increasing admiration and awe – the starry sky above me and the moral law within me.", author: "Immanuel Kant", source: "Critique of Practical Reason" },
+  { id: "2024-4", year: 2024, place: "Finland", text: "Artificial intelligence is not an objective, universal, or neutral computational technique that makes determinations without human direction. Its systems are embedded in social, political, cultural, and economic worlds … they are designed to discriminate, to amplify hierarchies, and to encode narrow classifications.", author: "Kate Crawford", source: "The Atlas of AI (2021)" },
+  { id: "2017-4", year: 2017, place: "Netherlands", text: "People who fail to examine themselves, to develop their capacities for critical reasoning and self‑reflection, are easy to influence; they are easily swayed by demagoguery or rhetorical appeals without analyzing arguments or evidence.", author: "Martha Nussbaum", source: "Cited in topics" },
+  { id: "2016-4", year: 2016, place: "Belgium", text: "With a word: the actions of men are never free; they are always necessary results of their temperament, their ideas received from outside, the true or false conceptions that men have of happiness, and finally their views fortified by example, education and daily experience.", author: "Paul Henri Dietrich Holbach", source: "Système de la nature (System of Nature)" },
+  { id: "1996-4", year: 1996, place: "Turkey", text: "So act that you treat humanity in your person, as well as in the person of every other human being, always as an end, never as a means.", author: "Immanuel Kant", source: "Groundwork of the Metaphysics of Morals" },
+  { id: "2000-4", year: 2000, place: "Germany", text: "All men naturally desire knowledge.", author: "Aristotle", source: "Metaphysics I, 980a" },
+  { id: "2018-2", year: 2018, place: "Montenegro", text: "No man is devoid of a heart sensitive to the sufferings of others. Such a sensitive heart was possessed by Former Kings and this manifested itself in compassionate government. With such sensitive heart behind compassionate government, it was as easy to rule the empire as rolling it on your palm.", author: "Mencius", source: "Mencius [2a:6]" },
+  { id: "2024-2", year: 2024, place: "Finland", text: "Once war has been declared for just causes, the prince should press his campaign not for the destruction of his opponents, but for the pursuit of the right for which he fights and the defence of his homeland, so that by fighting he may eventually establish peace and security.", author: "Francisco de Vitoria", source: "On the Law of War (1539)" },
+  { id: "2018-4", year: 2018, place: "Montenegro", text: "A work of art takes place in and as a performance in which listeners or observers abstract the artwork out of the context of the empirical or real world to render it purely aesthetic … an abstractive and active deed that requires them to achieve a state of self‑ or world‑forgetfulness as they enter into the new world of the work of art.", author: "Lydia Goehr", source: "The Curse and Promise of the Absolutely Musical: Tristan und Isolde and Don Giovanni (2006)" },
+  { id: "2017-2", year: 2017, place: "Netherlands", text: "Universal tolerance is a farce when it is allowed to suppress the already oppressed and when it is insisted upon by those who by virtue of their corporate or government power have the capacity to benefit from that tolerance while seeking to oppress others.", author: "Herbert Marcuse", source: "Repressive Tolerance (1965)" },
+  { id: "2013-3", year: 2013, place: "Denmark", text: "Majority rule without a constitution can suppress minority rights, and dissenting opinions; this is not democracy but majority tyranny.", author: "Hannah Arendt", source: "Reflections on Revolution" },
+  { id: "2013-4", year: 2013, place: "Denmark", text: "Do not do to others what you do not want them to do to you – is this moral principle to be found in cultures other than the Analects?", author: "Confucius", source: "Analects 15.23" },
+  { id: "2025-4", year: 2025, place: "Italy", text: "The image gives, by itself, almost no intelligibility. The image must be explained; and the explanation given about it on television is insufficient. … at the moment, it is true that there is no integration, but subtraction and that, therefore, the act of seeing is atrophying the ability to understand.", author: "Giovanni Sartori", source: "Homo videns. La sociedad teledirigida (1997/2008)" },
+  { id: "2015-4", year: 2015, place: "Estonia", text: "Philosophers have since Plato argued that the body is a prison of the soul; Michel Foucault inverts this conception: the soul is a prison of the body.", author: "Concept from Michel Foucault", source: "Discipline and Punish" },
+  { id: "2020-3", year: 2020, place: "Slovenia", text: "It will be necessary to awaken the experience of the world such as it appears to us insofar as we are in the world through our bodies … by re‑establishing contact with the body and with the world … we will also rediscover ourselves.", author: "Maurice Merleau‑Ponty", source: "Phenomenology of Perception (1945/2014)" },
+  { id: "2009-3", year: 2009, place: "Finland", text: "Must a work of art be beautiful in order to be a work of art, or may a work of art be ugly as well? If the latter is possible, why should we take interest in it?", author: "Question (aesthetic theory)", source: "IPO topic question" },
+  { id: "1999-2", year: 1999, place: "Hungary", text: "Desire is the essence of the human being.", author: "Benedictus Spinoza", source: "Ethics" },
+  { id: "2015-2", year: 2015, place: "Estonia", text: "Life and death, success and failure, poverty and wealth … these are all transformations of events, like life and death; they do not affect one’s true being. Therefore they should not disrupt one’s harmony.", author: "Zhuangzi", source: "Zhuangzi, Outer Chapters" },
+  { id: "2004-1", year: 2004, place: "South Korea", text: "The decisive argument employed by common sense against freedom consists in reminding us of our impotence … I am not free either to escape the lot of my class, my nation, my family or even to conquer my insignificant appetites or habits.", author: "Jean‑Paul Sartre", source: "Being and Nothingness" },
+  { id: "1995-2", year: 1995, place: "Bulgaria", text: "Actually it is impossible for us to consider ourselves non‑existent.", author: "Miguel de Unamuno", source: "The Tragic Sense of Life" },
+  { id: "2023-4", year: 2023, place: "Greece", text: "The principle of equal consideration of interests extends to any being that has interests; therefore, the interests of every being affected by an action are to be taken into account …", author: "Peter Singer", source: "Animal Liberation" },
+  { id: "2014-4", year: 2014, place: "Lithuania", text: "When wise men and stupid men look at the Doctrine of the Mean, the wise dismiss it as impracticable and the stupid fail to apply it; how, then, can it be popularised?", author: "Confucius", source: "The Doctrine of the Mean" },
+  { id: "2023-2", year: 2023, place: "Greece", text: "Vice and virtue … are not qualities in objects, but perceptions in the mind.", author: "David Hume", source: "A Treatise of Human Nature" },
+  { id: "1993-1", year: 1993, place: "Bulgaria", text: "Home is far more a state of mind than landscape.", author: "Gaston Bachelard", source: "The Poetics of Space" },
+  { id: "2012-1", year: 2012, place: "Norway", text: "Beauty does not manifest itself on its own; it is revealed by humans.", author: "Liu Zongyuan", source: "Essay on aesthetics" },
+  { id: "2013-2", year: 2013, place: "Denmark", text: "Tragedy is a mimesis of an action that is complete and of some magnitude; performed by actors not through narrative; effecting through pity and fear the catharsis of such emotions.", author: "Aristotle", source: "Poetics" },
+  { id: "2013-1", year: 2013, place: "Denmark", text: "Subjectivity or inwardness is the truth; objective truth is not enough, one must appropriate it. Socratic wisdom is exactly what both confers to one who confesses that one does not know …", author: "Søren Kierkegaard", source: "Concluding Unscientific Postscript" },
+  { id: "2016-1", year: 2016, place: "Belgium", text: "Spoken sounds are symbols of affections of the soul, and written marks are symbols of spoken sounds; just as written letters are not the same for all nations, neither are spoken sounds.", author: "Aristotle", source: "De Interpretatione, 1" },
+  { id: "2012-3", year: 2012, place: "Norway", text: "The interests of animals must be counted morally; beings incapable of suffering offer nothing to consider morally.", author: "Peter Singer", source: "Animal Liberation" },
+  { id: "2018-3", year: 2018, place: "Montenegro", text: "Because a (narrower or wider) universal community widely prevails among the Earth’s peoples, a transgression of rights in one place in the world is felt everywhere …", author: "Immanuel Kant", source: "To Perpetual Peace (1795)" },
+  { id: "1993-3", year: 1993, place: "Bulgaria", text: "Everything we see could be otherwise.", author: "Ludwig Wittgenstein", source: "Remarks on Colour" },
+  { id: "1997-3", year: 1997, place: "Poland", text: "Justice without force is powerless; force without justice is tyrannical.", author: "Blaise Pascal", source: "Pensées" },
+  { id: "2025-2", year: 2025, place: "Italy", text: "Since authority always demands obedience; it is commonly mistaken for some form of power or violence. Yet authority precludes the use of external means of coercion; where force is used, authority has failed. Authority, on the other hand, is incompatible with persuasion, which presupposes equality and works through a process of argumentation. Where arguments are used, authority is left in abeyance.", author: "Hannah Arendt", source: "What is authority? Between Past and Future (1954/2006)" },
+  { id: "2009-2", year: 2009, place: "Finland", text: "In accordance with reason there is only one way that states can leave the lawless condition which involves nothing but war: they must give up their savage freedom, accommodate themselves to public coercive laws, and form an always growing state of nations (civitas gentium).", author: "Immanuel Kant", source: "Toward Perpetual Peace" },
+  { id: "2022-1", year: 2022, place: "Portugal", text: "Although the word Logos is common, most people live as if they had a wisdom of their own.", author: "Heraclitus", source: "Fragment (DK B2)" },
+  { id: "2015-1", year: 2015, place: "Estonia", text: "The novel is justified only if it is a mode of communication irreducible to other forms. Philosophers reconstruct experience intellectually; the novelist aims to present the experience itself on an imaginary plane.", author: "Simone de Beauvoir", source: "The Novel’s Relationship with Philosophy" },
+  { id: "2022-3", year: 2022, place: "Portugal", text: "The principle of perfection is the final goal of pure reason … Perfection is the only unconditioned good … Beauty is the expression of the ideal …", author: "Immanuel Kant", source: "Critique of Judgment" },
+  { id: "2023-3", year: 2023, place: "Greece", text: "Our body is at one with the world, and its pains and satisfactions are those of the world itself; we have to descend into it, down to its secret bed …", author: "Rachel Bespaloff", source: "Reflection from Topics page" },
+  { id: "2002-4", year: 2002, place: "Japan", text: "It is another paradox, but God as the true absolute must be Satan too. Only then can God be truly omniscient and omnipotent … the absolute God must include absolute negation within himself, and must be the God who descends into ultimate evil.", author: "Nishida Kitaro", source: "Last Writing – Nothingness and the Religious Worldview" },
+  { id: "2025-1", year: 2025, place: "Italy", text: "It may be confidently asserted that no man chooses evil, because it is evil; he only mistakes it for happiness, the good he seeks. And the desire of rectifying these mistakes, is the noble ambition of an enlightened understanding, the impulse of feelings that Philosophy invigorates.", author: "Mary Wollstonecraft", source: "A Vindication of the Rights of Men (1790)" },
+  { id: "2017-3", year: 2017, place: "Netherlands", text: "Neutrality is necessary in public interaction. But in this technological society, neutrality as an ethical virtue is modified to tolerance; neutrality becomes tolerance.", author: "Tomonobu Imamichi", source: "From the topics text" },
+  { id: "2009-1", year: 2009, place: "Finland", text: "If there is some end of the things we do which we desire for its own sake … clearly this must be the good and the chief good.", author: "Aristotle", source: "Nicomachean Ethics" },
+  { id: "2002-1", year: 2002, place: "Japan", text: "So you would have us qualify our former notion of the just man … we said it was just to do good to a friend and evil to an enemy, but now we add that it is just to benefit the friend if he is good and harm the enemy if he is bad.", author: "Plato", source: "Republic" },
+  { id: "1997-2", year: 1997, place: "Poland", text: "Der Künstler lehrt uns durch sein Auge in die Welt blicken (The artist teaches us to look into the world through his eye).", author: "Arthur Schopenhauer", source: "The World as Will and Representation" },
+  { id: "2007-3", year: 2007, place: "Turkey", text: "Space is not in the subject, nor is the world in space.", author: "Martin Heidegger", source: "Being and Time" },
+  { id: "1997-4", year: 1997, place: "Poland", text: "The idea that one should seek the truth for its own sake doesn’t make sense to us pragmatists. The aim of an investigation is rather to come to an agreement between people about what to do … all descriptions we can give of things conform with our ends; we have to know whether competing descriptions are more useful.", author: "Richard Rorty", source: "Relativism: To discover and to invent" },
+  { id: "1998-3", year: 1998, place: "Romania", text: "Der Mensch wird durch die anderen geschaffen (Man is made by others).", author: "Michel de Montaigne", source: "Essais" },
+  { id: "2004-3", year: 2004, place: "South Korea", text: "In fact, history does not belong to us, but we belong to history.", author: "Hans‑Georg Gadamer", source: "Truth and Method" },
+  { id: "2003-2", year: 2003, place: "Argentina", text: "The maxims of the philosophers on the conditions under which public peace is possible shall be consulted by states which are armed for war.", author: "Immanuel Kant", source: "Perpetual Peace" },
+  { id: "1996-2", year: 1996, place: "Turkey", text: "The evil in the world originates always from ignorance, and good will may cause as much damage as malice if it is not enlightened.", author: "Albert Camus", source: "The Plague / The Rebel" },
+  { id: "2011-2", year: 2011, place: "Austria", text: "To a wise man the whole world is open. For the whole cosmos is the fatherland of a good soul.", author: "Democritus", source: "Fragment 247 (as quoted in IPO topics)" },
+  { id: "2004-4", year: 2004, place: "South Korea", text: "Does science need philosophy?", author: "Question", source: "IPO topic question" },
+  { id: "2001-1", year: 2001, place: "USA", text: "The laws of conscience, which we pretend to be derived from nature, proceed from custom.", author: "Michel de Montaigne", source: "Essais" },
+  { id: "2002-2", year: 2002, place: "Japan", text: "Those who cannot remember the past are condemned to repeat it.", author: "George Santayana", source: "The Life of Reason" },
+  { id: "2017-1", year: 2017, place: "Netherlands", text: "Whether we think, judge and speak freely or not is not a problem; the sovereign must not act against his own decrees, provided that one uses reason and does not act out of hatred or cunning.", author: "Baruch Spinoza", source: "Tractatus Theologico‑Politicus" },
+  { id: "2022-2", year: 2022, place: "Portugal", text: "Knowing others is intelligent; knowing yourself is true wisdom. Mastering others is strength; mastering yourself is true power.", author: "Laozi", source: "Daodejing" },
+  { id: "2001-4", year: 2001, place: "USA", text: "During the time men live without a common power to keep them all in awe, they are in that condition which is called war; and such a war as is of every man against every man.", author: "Thomas Hobbes", source: "Leviathan, Chapter XIII" },
+  { id: "2005-2", year: 2005, place: "Poland", text: "Today, the truth is dispersed across many universes of discourse which can no longer be arranged in a hierarchy. However, in each of these discourses we search tenaciously for insights that can convince all.", author: "Jürgen Habermas", source: "Quoted in Sinn und Form (1989) / taz 1990" },
+  { id: "2005-1", year: 2005, place: "Poland", text: "If I had to choose between betraying my country and betraying my friend, I hope I should have the guts to betray my country.", author: "E.M. Forster", source: "What I Believe (Two Cheers for Democracy)" },
+  { id: "2014-1", year: 2014, place: "Lithuania", text: "Killing the innocent as a means to any end is always murder; cases of statistical certainty require scruples, and unscrupulousness turns killing into murder.", author: "G.E.M. Anscombe", source: "War and Murder" },
+  { id: "2022-4", year: 2022, place: "Portugal", text: "Guilt is not collective; rather, the fact that collectivities are responsible for what the individuals in them have done … there is a purely political question of responsibility to which guilt is not relevant.", author: "Hannah Arendt", source: "Collected Works – Responsibility and Judgment" },
+]
 
-export async function fetchQuotes(): Promise<Quote[]> {
-  if (cachedQuotes) return cachedQuotes
+// Week 0 began on Monday 14 September 2026, 00:00 UTC. Each quote lasts one week.
+export const EPOCH = Date.UTC(2026, 8, 14)
+const WEEK = 7 * 24 * 60 * 60 * 1000
 
-  try {
-    const response = await fetch(
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ipo_quotes-ViwVneXrL2dcjx09nnYqdPGwcL68cU.csv",
-    )
-    const text = await response.text()
-
-    // Parse CSV - assuming format is: quote,author or just quote
-    const lines = text.split("\n").filter((line) => line.trim())
-    const quotes: Quote[] = []
-
-    for (let i = 1; i < lines.length; i++) {
-      // Skip header
-      const line = lines[i].trim()
-      if (!line) continue
-
-      // Handle CSV with quotes and commas
-      const match = line.match(/^"?([^"]*)"?(?:,(.*))?$/)
-      if (match) {
-        quotes.push({
-          text: match[1].replace(/""/g, '"').trim(),
-          author: match[2]?.replace(/^"?|"?$/g, "").trim(),
-        })
-      }
-    }
-
-    cachedQuotes = quotes
-    return quotes
-  } catch (error) {
-    console.error("[v0] Failed to fetch quotes:", error)
-    // Return empty array if fetch fails
-    return []
-  }
+export function weekIndex(now: number = Date.now()): number {
+  return Math.floor((now - EPOCH) / WEEK)
 }
 
-// Get the base date for quote assignment (first Thursday or Sunday)
-export function getBaseDate(): Date {
-  // Start from January 1, 2024 (a Monday)
-  const base = new Date("2024-01-01")
-  // Find the first Thursday (day 4)
-  while (base.getDay() !== 4) {
-    base.setDate(base.getDate() + 1)
-  }
-  return base
+export function quoteForWeek(index: number): Quote {
+  const n = QUOTES.length
+  return QUOTES[((index % n) + n) % n]
 }
 
-// Check if a date is a writing day (Thursday or Sunday)
-export function isWritingDay(date: Date): boolean {
-  const day = date.getDay()
-  return day === 0 || day === 4 // Sunday or Thursday
+export function currentQuote(now: number = Date.now()): Quote {
+  return quoteForWeek(weekIndex(now))
 }
 
-// Get the quote index for a specific date
-export function getQuoteIndexForDate(date: Date, totalQuotes: number): number {
-  if (totalQuotes === 0) return -1
-
-  const baseDate = getBaseDate()
-  const currentDate = new Date(date)
-  currentDate.setHours(0, 0, 0, 0)
-
-  // Count writing days from base date to current date
-  let writingDayCount = 0
-  const tempDate = new Date(baseDate)
-
-  while (tempDate <= currentDate) {
-    if (isWritingDay(tempDate)) {
-      if (tempDate.getTime() === currentDate.getTime()) {
-        return writingDayCount % totalQuotes
-      }
-      writingDayCount++
-    }
-    tempDate.setDate(tempDate.getDate() + 1)
-  }
-
-  return -1
+export function previousQuote(now: number = Date.now()): Quote {
+  return quoteForWeek(weekIndex(now) - 1)
 }
 
-// Get the next writing day from today
-export function getNextWritingDay(): Date {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const next = new Date(today)
-  next.setDate(next.getDate() + 1)
-
-  while (!isWritingDay(next)) {
-    next.setDate(next.getDate() + 1)
-  }
-
-  return next
+export function weekEnds(now: number = Date.now()): Date {
+  return new Date(EPOCH + (weekIndex(now) + 1) * WEEK)
 }
 
-// Get days until next writing day
-export function getDaysUntilNextWriting(): number {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const next = getNextWritingDay()
-
-  const diffTime = next.getTime() - today.getTime()
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-
-  return diffDays
+export function quoteById(id: string): Quote | undefined {
+  return QUOTES.find((q) => q.id === id)
 }
 
-// Format the "See quote for..." text
-export function getNextQuoteText(): string {
-  const days = getDaysUntilNextWriting()
-
-  if (days === 0) return "See today's quote"
-  if (days === 1) return "See quote for tomorrow"
-  return `See quote in ${days} days`
+export function shorten(text: string, max = 90): string {
+  if (text.length <= max) return text
+  const cut = text.lastIndexOf(" ", max)
+  return text.slice(0, cut > 40 ? cut : max) + "…"
 }

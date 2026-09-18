@@ -1,0 +1,20 @@
+// What the empty page whispers before you write. One is picked at random each visit.
+export const PLACEHOLDERS = [
+  "A novel is never anything but a philosophy expressed in images.",
+  "Art must be an axe for the frozen sea inside us.",
+  "One must still have chaos in oneself to give birth to a dancing star.",
+  "What would life be if we had no courage to attempt anything?",
+  "In the depth of winter, I found there was, within me, an invincible summer.",
+  "No one really wants to die alone, but some of us will try.",
+  "You are God above a white page.",
+  "It's okay for music to not be about anything.",
+  "The deeper and darker the despair, the brighter and more powerful the hope born from it.",
+  "Why climb a mountain when you'll rot up there alone?",
+  "There's a loneliness that's part of living as a human being that you can never get rid of.",
+  "Searching for more answers despite the pain they may bring is a much more honest way of living.",
+  "May you never forget me.",
+  "You've got to keep on living, no matter what.",
+  "Don't walk in front of me, I may not follow. Don't walk behind me, I may not lead. Walk beside me.",
+  "Everything we see could be otherwise.",
+  "Live to the point of tears.",
+]
