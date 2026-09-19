@@ -15,10 +15,12 @@ export default function Nav() {
     <nav aria-label="pages">
       {ITEMS.map(([href, label]) => {
         const current = href === "/" ? path === "/" : path.startsWith(href)
-        return (
-          <span key={href}>
-            [{current ? <b>{label}</b> : <a href={href}>{label}</a>}]
-          </span>
+        return current ? (
+          <b key={href}>{label}</b>
+        ) : (
+          <a key={href} href={href}>
+            {label}
+          </a>
         )
       })}
     </nav>

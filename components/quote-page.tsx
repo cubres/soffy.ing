@@ -1,5 +1,7 @@
 import { Fragment } from "react"
 import PostView from "@/components/post"
+import NotConnected from "@/components/not-connected"
+import { isNoDatabase } from "@/lib/db"
 import { listPosts } from "@/lib/posts"
 import { currentQuote, previousQuote, shorten, weekEnds, type Quote } from "@/lib/quotes"
 import { fmtDate } from "@/lib/time"
@@ -10,13 +12,19 @@ export default async function QuotePage({ quote }: { quote: Quote }) {
   const previous = previousQuote()
   const isCurrent = quote.id === current.id
   const isPrevious = quote.id === previous.id
-  const posts = await listPosts({ quoteId: quote.id, limit: 100 })
+  let posts: Awaited<ReturnType<typeof listPosts>> = []
+  let connected = true
+  try {
+    posts = await listPosts({ quoteId: quote.id, limit: 100 })
+  } catch (error) {
+    if (!isNoDatabase(error)) throw error
+    connected = false
+  }
 
   return (
     <>
       <p className="muted">
-        {isCurrent ? `this week's quote · until ${fmtDate(weekEnds())}` : isPrevious ? "last week's quote" : "an earlier quote"}
-        {" · "}
+        {isCurrent ? `this week, until ${fmtDate(weekEnds())}` : isPrevious ? "last week" : "an earlier week"} ·
         International Philosophy Olympiad, {quote.place} {quote.year}
       </p>
       <blockquote>“{quote.text}”</blockquote>
@@ -30,14 +38,15 @@ export default async function QuotePage({ quote }: { quote: Quote }) {
       </p>
       {(isCurrent || isPrevious) && (
         <p>
-          <a href="/?on=quote">[write on it]</a>
-          {isPrevious && <span className="muted"> · responses to last week's quote are still welcome</span>}
+          <a href="/?on=quote">write on it</a>
         </p>
       )}
 
       <p className="sep">· · ·</p>
 
-      {posts.length === 0 ? (
+      {!connected ? (
+        <NotConnected />
+      ) : posts.length === 0 ? (
         <p className="muted">no responses yet. be the first, and the only one who knows it was you.</p>
       ) : (
         posts.map((post, i) => (
@@ -52,7 +61,7 @@ export default async function QuotePage({ quote }: { quote: Quote }) {
         <>
           <p className="sep">· · ·</p>
           <p className="muted">
-            last week: <a href={`/quote/${previous.id}`}>“{shorten(previous.text, 80)}”</a> · {previous.author}
+            last week: <a href={`/quote/${previous.id}`}>“{shorten(previous.text, 72)}”</a> · {previous.author}
           </p>
         </>
       )}

@@ -19,7 +19,7 @@ export default function PostView({ post, excerpt = false }: { post: Post; excerp
     <article>
       {quote && (
         <p className="muted">
-          on the quote <a href={`/quote/${quote.id}`}>“{shorten(quote.text, 80)}”</a> · {quote.author}
+          on <a href={`/quote/${quote.id}`}>“{shorten(quote.text, 72)}”</a> · {quote.author}
         </p>
       )}
       <div className="body">
@@ -29,12 +29,12 @@ export default function PostView({ post, excerpt = false }: { post: Post; excerp
       <p className="muted">
         {cut && (
           <>
-            <a href={`/p/${post.id}`}>[continue]</a> ·{" "}
+            <a href={`/p/${post.id}`}>more</a> ·{" "}
           </>
         )}
-        {fmtDate(post.created_at)} · {fmtWords(post.word_count)} · written in {fmtMinutes(post.write_seconds)} under a{" "}
+        {fmtDate(post.created_at)} · {fmtWords(post.word_count)} · {fmtMinutes(post.write_seconds)} under a{" "}
         {fmtClock(post.clock_seconds)} clock
-        {post.pause_count > 0 && `, ${plural(post.pause_count, "pause")}`} · vanishes {fmtDate(post.expires_at)}
+        {post.pause_count > 0 && `, ${plural(post.pause_count, "pause")}`} · gone on {fmtDate(post.expires_at)}
       </p>
     </article>
   )

@@ -1,14 +1,14 @@
-/* The whole design. Text on a white grid. The only colour is red, and it only ever means loss. */
+/* The whole design. One typeface, black on white, and words. The only colour is red, and it only ever means loss. */
 
 :root {
-  --fg: #111111;
-  --muted: #7b7b7b;
-  --grid: #e8e8e8;
+  --fg: #1a1a1a;
+  --muted: #8a8a8a;
+  --faint: #d4d4d4;
   --bg: #ffffff;
-  --loss: #c0201f;
-  --line: 24px;          /* one line of text            */
-  --cell: 48px;          /* one square of the grid      */
-  --measure: 72ch;       /* the width of the text column */
+  --loss: #b3261e;
+  --line: 26px;
+  --gap: 52px;
+  --measure: 64ch;
 }
 
 * {
@@ -23,15 +23,11 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--fg);
-  background-color: var(--bg);
-  background-image:
-    linear-gradient(to right, var(--grid) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-  background-size: var(--cell) var(--cell);
-  background-position: center 0;
+  background: var(--bg);
   font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 15px;
+  font-size: 16px;
   line-height: var(--line);
+  font-variant-ligatures: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -46,31 +42,43 @@ footer {
 }
 
 header {
-  padding-top: var(--cell);
+  padding-top: 72px;
 }
 
-header h1 {
-  margin: 0;
-}
-
+header h1,
 header p {
   margin: 0;
 }
 
-nav {
-  margin: var(--line) 0 var(--cell);
+header h1 a {
+  text-decoration: none;
 }
 
-nav span {
-  margin-right: 2ch;
+nav {
+  margin: var(--line) 0 var(--gap);
+}
+
+nav a,
+nav b {
+  margin-right: 3ch;
+  font-weight: 400;
+}
+
+nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: var(--fg);
 }
 
 main {
-  padding-bottom: var(--cell);
+  padding-bottom: var(--gap);
 }
 
 footer {
-  padding-bottom: var(--cell);
+  padding-bottom: 72px;
 }
 
 h1,
@@ -78,8 +86,12 @@ h2,
 h3 {
   font-size: inherit;
   line-height: inherit;
-  font-weight: 600;
-  margin: 0 0 var(--line);
+  font-weight: 700;
+  margin: var(--gap) 0 var(--line);
+}
+
+main > h2:first-child {
+  margin-top: 0;
 }
 
 p,
@@ -97,26 +109,26 @@ ol {
 }
 
 blockquote {
-  margin-left: 0;
   padding-left: 2ch;
-  border-left: 1px solid var(--fg);
+  border-left: 2px solid var(--faint);
   font-style: italic;
 }
 
 a {
   color: inherit;
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration-color: var(--faint);
   text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
 }
 
 a:hover {
-  text-decoration-thickness: 2px;
+  text-decoration-color: var(--fg);
 }
 
 b,
 strong {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .muted {
@@ -127,21 +139,22 @@ strong {
   color: var(--loss);
 }
 
-.off {
-  color: var(--muted);
-}
-
 .sep {
-  text-align: center;
-  color: var(--muted);
-  margin: var(--line) 0;
+  color: var(--faint);
+  margin: var(--gap) 0;
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
   column-gap: 2ch;
-  row-gap: 0;
+}
+
+.between {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  column-gap: 2ch;
 }
 
 .body {
@@ -154,50 +167,50 @@ article {
   margin: 0;
 }
 
-/* Buttons are words in brackets, nothing more. */
+/* An action is a word. Grey until you mean it. */
 button.t {
   all: unset;
   cursor: pointer;
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
+  color: var(--muted);
 }
 
-button.t:hover {
-  text-decoration-thickness: 2px;
+button.t:hover,
+button.t.fg {
+  color: var(--fg);
+}
+
+button.t.loss {
+  color: var(--loss);
 }
 
 button.t:focus-visible {
   outline: 1px solid var(--fg);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 button.t:disabled {
-  color: var(--muted);
+  color: var(--faint);
   cursor: default;
-  text-decoration: none;
 }
 
-/* The one numeric input, for the clock: a word with a line under it. */
+/* The one number you can change: the clock. */
 input.t {
   all: unset;
-  width: 5ch;
+  width: 4ch;
   text-align: right;
-  border-bottom: 1px solid var(--fg);
-  color: inherit;
+  color: var(--fg);
+  border-bottom: 1px solid var(--faint);
 }
 
-input.t:disabled {
-  color: var(--muted);
-  border-bottom-color: var(--muted);
+input.t:focus {
+  border-bottom-color: var(--fg);
 }
 
-/* The page itself. No border, no box: the grid shows through and the text sits on it. */
+/* The page. No border, no box, nothing but a caret. */
 textarea {
   display: block;
   width: 100%;
-  min-height: 60vh;
+  min-height: 62vh;
   margin: 0 0 var(--line);
   padding: 0;
   border: 0;
@@ -222,24 +235,19 @@ textarea::placeholder {
 }
 
 @media (max-width: 520px) {
+  :root {
+    --line: 24px;
+    --gap: 40px;
+  }
   body {
-    font-size: 14px;
+    font-size: 15px;
   }
   header,
   main,
   footer {
-    padding: 0 16px;
+    padding: 0 18px;
   }
   header {
-    padding-top: var(--line);
-  }
-  nav {
-    margin-bottom: var(--line);
-  }
-}
-
-@media print {
-  body {
-    background-image: none;
+    padding-top: 40px;
   }
 }

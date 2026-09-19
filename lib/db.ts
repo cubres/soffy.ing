@@ -6,6 +6,17 @@ import { mkdirSync } from "node:fs"
 
 type Row = Record<string, unknown>
 
+export class NoDatabaseError extends Error {
+  constructor() {
+    super("no database is connected yet")
+    this.name = "NoDatabaseError"
+  }
+}
+
+export function isNoDatabase(error: unknown): boolean {
+  return error instanceof Error && error.name === "NoDatabaseError"
+}
+
 interface Driver {
   query<T = Row>(text: string, params?: unknown[]): Promise<T[]>
 }
@@ -41,6 +52,10 @@ async function connect(): Promise<Driver> {
         return Array.from(rows) as unknown as T[]
       },
     }
+  }
+  if (process.env.VERCEL) {
+    // Deployed without a database: say so plainly instead of crashing on a read-only disk.
+    throw new NoDatabaseError()
   }
   mkdirSync(".data", { recursive: true })
   const { PGlite } = await import("@electric-sql/pglite")

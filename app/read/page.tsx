@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { Fragment } from "react"
 import PostView from "@/components/post"
+import NotConnected from "@/components/not-connected"
+import { isNoDatabase } from "@/lib/db"
 import { listPosts } from "@/lib/posts"
 
 export const dynamic = "force-dynamic"
@@ -14,12 +16,18 @@ const PAGE = 20
 
 export default async function ReadPage({ searchParams }: { searchParams: Promise<{ before?: string }> }) {
   const { before } = await searchParams
-  const posts = await listPosts({ before: before ? new Date(before) : undefined, limit: PAGE })
+  let posts
+  try {
+    posts = await listPosts({ before: before ? new Date(before) : undefined, limit: PAGE })
+  } catch (error) {
+    if (isNoDatabase(error)) return <NotConnected />
+    throw error
+  }
 
   if (posts.length === 0) {
     return (
       <p className="muted">
-        {before ? "nothing older than this." : "nothing here yet."} <a href="/">[write]</a> something.
+        {before ? "nothing older than this." : "nothing here yet."} <a href="/">write</a> something.
       </p>
     )
   }
@@ -34,8 +42,8 @@ export default async function ReadPage({ searchParams }: { searchParams: Promise
         </Fragment>
       ))}
       {posts.length === PAGE && (
-        <p>
-          <a href={`/read?before=${encodeURIComponent(new Date(last.created_at).toISOString())}`}>[older]</a>
+        <p className="muted">
+          <a href={`/read?before=${encodeURIComponent(new Date(last.created_at).toISOString())}`}>older</a>
         </p>
       )}
     </>

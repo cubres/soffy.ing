@@ -1,13 +1,13 @@
 import type { Metadata } from "next"
 import type React from "react"
-import { IBM_Plex_Mono } from "next/font/google"
+import { JetBrains_Mono } from "next/font/google"
 import Nav from "@/components/nav"
 import "./globals.css"
 
 // Self-hosted at build time. The browser never talks to a font server.
-const mono = IBM_Plex_Mono({
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "600"],
+const mono = JetBrains_Mono({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext", "greek"],
+  weight: ["400", "700"],
   style: ["normal", "italic"],
   variable: "--font-mono",
   display: "swap",
@@ -32,11 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Nav />
         </header>
         <main>{children}</main>
-        <footer className="muted">
-          text only · no names · no numbers · no memory
-          <br />
-          everything posted here vanishes after thirty days.
-        </footer>
+        <footer className="muted">no names · no numbers · no images · no memory</footer>
       </body>
     </html>
   )

@@ -7,11 +7,10 @@ export const dynamic = "force-dynamic"
 
 export default async function WritePage({ searchParams }: { searchParams: Promise<{ on?: string }> }) {
   const { on } = await searchParams
-  const q = currentQuote()
+  const q = on === "quote" ? currentQuote() : null
   return (
     <Editor
-      quote={{ id: q.id, text: q.text, author: q.author, source: q.source }}
-      defaultOnQuote={on === "quote"}
+      quote={q ? { id: q.id, text: q.text, author: q.author } : null}
       limits={{
         minWords: LIMITS.minWords,
         minSeconds: LIMITS.minSeconds,

@@ -14,7 +14,7 @@ The argument for all of this is on the site itself, at [soffy.ing/about](https:/
 |---|---|
 | no names | there is no `users` table. the only table is `posts`. |
 | no numbers | posts have no likes, views or counters. the only numbers stored are what the clock measured: seconds written, pauses, clock length, word count. |
-| no images | there are no image files in the repository. the favicon is an SVG containing the two characters `s.` and the design is one CSS file. |
+| no images | there are no image files in the repository. the favicon is an SVG containing the two characters `s.`, the design is one CSS file, and there is not even a grid: black type on a white page. |
 | no memory | every post has an `expires_at` and every query filters on it, so a post stops existing for readers the second it expires. `robots.txt` tells every model crawler to keep out. no analytics, no cookies, no third-party requests; the typeface is self-hosted. |
 
 ## the clock, in code
@@ -22,7 +22,6 @@ The argument for all of this is on the site itself, at [soffy.ing/about](https:/
 Posting requires that the text was typed here, live:
 
 - paste and drop are refused in the editor
-- a file can be imported for personal use, but imported text can never be posted
 - the clock must be on, and the piece must have taken at least two minutes and forty words
 - every post carries `write_seconds`, `pause_count` (gaps of ten seconds or more) and `clock_seconds`, and shows them
 
@@ -31,7 +30,7 @@ This is proof of process, not proof of humanity. The site says so.
 ## the shape of it
 
 - **Next.js 15**, App Router, TypeScript. Server components everywhere except the editor and the nav.
-- **One CSS file**, `app/globals.css`. One typeface, IBM Plex Mono, self-hosted at build. A white grid drawn with two CSS gradients.
+- **One CSS file**, `app/globals.css`. One typeface, JetBrains Mono, self-hosted at build. Every control is a word; the only colour is red, and it only means loss.
 - **One table**, `posts`. See `schema.sql`. Created automatically on first use.
 - **Five runtime dependencies**: `next`, `react`, `react-dom`, `postgres` (production) and `@electric-sql/pglite` (local development, an in-process Postgres so the site runs with zero setup).
 - **No API routes.** Posting, reporting and moderation are server actions in `lib/actions.ts`.
@@ -52,14 +51,21 @@ npm run dev
 
 With no `DATABASE_URL` set, the site uses PGlite and keeps its data in `.data/` (git-ignored). Delete that folder to start clean.
 
+Deployed on Vercel without a `DATABASE_URL`, the writing page works and the reading pages say so plainly instead of failing; connect a database and redeploy to switch them on.
+
 ## deploy it
 
-1. Create a Postgres database. [Neon](https://neon.tech)'s free tier is enough. Copy its connection string.
-2. In the Vercel project, set three environment variables:
-   - `DATABASE_URL`: the Neon connection string
+1. Create a Postgres database. The quickest is Neon through the Vercel marketplace, which sets `DATABASE_URL` on the project by itself:
+
+   ```
+   vercel integration add neon --name soffy
+   ```
+
+   Any other Postgres works too: set `DATABASE_URL` to its connection string.
+2. Set two more environment variables:
    - `HASH_SALT`: any long random string. It salts the daily hash of each visitor's address. Changing it later is harmless.
    - `ADMIN_KEY`: any long random string. `/admin?key=<this>` is the only door with a key.
-3. Set the production branch to `main` and deploy. The table is created on first request.
+3. Deploy (`vercel deploy --prod`, or push to the production branch). The table is created on the first request.
 
 Generate the two secrets with:
 
@@ -83,4 +89,4 @@ All the limits are in one place, `LIMITS` in `lib/posts.ts`.
 
 ## what is deliberately missing
 
-Replies, likes, follows, search, an RSS feed, an API, an archive, an export of other people's posts, dark mode, a second typeface, a logo. Each one was left out on purpose. The reasons are on the about page.
+Replies, likes, follows, search, an RSS feed, an API, an archive, an export of other people's posts, rich text, file import, dark mode, a second typeface, a logo, a grid. Each one was left out on purpose. The reasons are on the about page.

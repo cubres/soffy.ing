@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { adminKeyOk } from "./admin"
+import { isNoDatabase } from "./db"
 import { requesterHash } from "./hash"
 import { isId } from "./ids"
 import { createPost, deletePost, reportPost, setHidden, type Draft } from "./posts"
@@ -17,6 +18,7 @@ export async function submitPost(draft: Draft): Promise<SubmitResult> {
     revalidatePath("/quote")
     return { ok: true, id: result.id, expiresAt: result.expiresAt.toISOString() }
   } catch (error) {
+    if (isNoDatabase(error)) return { ok: false, error: "the site is not connected to its database yet. save your text; it cannot be posted today." }
     console.error("submitPost failed:", error)
     return { ok: false, error: "the site could not save it. try again in a moment." }
   }
