@@ -1,8 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { submitPost, type SubmitResult } from "@/lib/actions"
-import { PLACEHOLDERS } from "@/lib/placeholders"
 import { fmtDate } from "@/lib/time"
 
 interface Props {
@@ -10,6 +9,9 @@ interface Props {
 }
 
 type Stage = "idle" | "confirm" | "posting" | "done"
+
+// What the empty page says.
+const PLACEHOLDER = "Statues made of gold are always hollow"
 
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length
@@ -20,11 +22,6 @@ export default function Editor({ limits }: Props) {
   const [stage, setStage] = useState<Stage>("idle")
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ id: string; expiresAt: string } | null>(null)
-  const [placeholder, setPlaceholder] = useState("")
-
-  useEffect(() => {
-    setPlaceholder(PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)])
-  }, [])
 
   function onChange(value: string) {
     setText(value)
@@ -69,7 +66,7 @@ export default function Editor({ limits }: Props) {
     <>
       <textarea
         value={text}
-        placeholder={placeholder}
+        placeholder={PLACEHOLDER}
         onChange={(e) => onChange(e.target.value)}
         spellCheck
         autoFocus
