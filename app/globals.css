@@ -33,8 +33,7 @@ body {
 }
 
 header,
-main,
-footer {
+main {
   width: 100%;
   max-width: var(--measure);
   margin: 0 auto;
@@ -74,10 +73,6 @@ nav a:hover {
 }
 
 main {
-  padding-bottom: var(--gap);
-}
-
-footer {
   padding-bottom: 72px;
 }
 
@@ -243,8 +238,7 @@ textarea::placeholder {
     font-size: 15px;
   }
   header,
-  main,
-  footer {
+  main {
     padding: 0 18px;
   }
   header {

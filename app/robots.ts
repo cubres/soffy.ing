@@ -38,7 +38,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       { userAgent: MODEL_CRAWLERS, disallow: "/" },
-      { userAgent: "*", allow: "/", disallow: ["/admin", "/p/", "/read"] },
+      { userAgent: "*", allow: "/", disallow: ["/admin", "/p/"] },
     ],
   }
 }

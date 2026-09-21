@@ -1,12 +1,9 @@
 import { query } from "./db"
 import { newId } from "./ids"
-import { currentQuote, previousQuote } from "./quotes"
 
 export const LIMITS = {
   minWords: 40,
-  minSeconds: 120,
   maxChars: 40_000,
-  maxClockSeconds: 3600,
   lifeDays: 30,
   postsPerDay: 5,
   minutesBetween: 10,
@@ -16,28 +13,15 @@ export const LIMITS = {
 export interface Post {
   id: string
   body: string
-  quote_id: string | null
   word_count: number
-  write_seconds: number
-  pause_count: number
-  clock_seconds: number
   hidden: boolean
   created_at: Date
   expires_at: Date
 }
 
-export interface Draft {
-  body: string
-  quoteId: string | null
-  writeSeconds: number
-  pauseCount: number
-  clockSeconds: number
-}
-
 export type CreateResult = { ok: true; id: string; expiresAt: Date } | { ok: false; error: string }
 
-const COLUMNS =
-  "id, body, quote_id, word_count, write_seconds, pause_count, clock_seconds, hidden, created_at, expires_at"
+const COLUMNS = "id, body, word_count, hidden, created_at, expires_at"
 
 export function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length
@@ -64,33 +48,13 @@ function fail(error: string): CreateResult {
   return { ok: false, error }
 }
 
-function int(value: unknown): number {
-  const n = Math.floor(Number(value))
-  return Number.isFinite(n) ? n : -1
-}
-
-export async function createPost(draft: Draft, authorHash: string): Promise<CreateResult> {
-  const body = cleanBody(String(draft.body ?? ""))
+export async function createPost(rawBody: string, authorHash: string): Promise<CreateResult> {
+  const body = cleanBody(String(rawBody ?? ""))
   const words = countWords(body)
   if (!body) return fail("there is nothing to post.")
   if (body.length > LIMITS.maxChars)
     return fail(`too long: the limit is ${LIMITS.maxChars.toLocaleString("en-GB")} characters.`)
   if (words < LIMITS.minWords) return fail(`too short: at least ${LIMITS.minWords} words.`)
-
-  const writeSeconds = int(draft.writeSeconds)
-  const pauseCount = int(draft.pauseCount)
-  const clockSeconds = int(draft.clockSeconds)
-  if (clockSeconds < 1 || clockSeconds > LIMITS.maxClockSeconds) return fail("the clock must be on to post.")
-  if (writeSeconds < LIMITS.minSeconds)
-    return fail(`too fast: at least ${LIMITS.minSeconds / 60} minutes under the clock.`)
-  if (pauseCount < 0) return fail("the clock did not add up.")
-
-  let quoteId: string | null = null
-  if (draft.quoteId) {
-    const allowed = [currentQuote().id, previousQuote().id]
-    if (!allowed.includes(draft.quoteId)) return fail("that quote is no longer this week's or last week's.")
-    quoteId = draft.quoteId
-  }
 
   const [counts] = await query<{ recent: string | number; today: string | number }>(
     `SELECT
@@ -106,34 +70,16 @@ export async function createPost(draft: Draft, authorHash: string): Promise<Crea
 
   const id = newId()
   const [row] = await query<{ expires_at: Date }>(
-    `INSERT INTO posts (id, body, quote_id, word_count, write_seconds, pause_count, clock_seconds, author_hash, expires_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now() + interval '${LIMITS.lifeDays} days')
+    `INSERT INTO posts (id, body, word_count, author_hash, expires_at)
+     VALUES ($1, $2, $3, $4, now() + interval '${LIMITS.lifeDays} days')
      RETURNING expires_at`,
-    [id, body, quoteId, words, Math.min(writeSeconds, 86_400), pauseCount, clockSeconds, authorHash],
+    [id, body, words, authorHash],
   )
 
   // Expired posts are invisible the moment they expire; this only reclaims the disk a day later.
   await query(`DELETE FROM posts WHERE expires_at < now() - interval '1 day'`)
 
   return { ok: true, id, expiresAt: new Date(row.expires_at) }
-}
-
-export async function listPosts(opts: { before?: Date; limit?: number; quoteId?: string } = {}): Promise<Post[]> {
-  const limit = opts.limit ?? 20
-  const params: unknown[] = [limit]
-  const where = ["NOT hidden", "expires_at > now()"]
-  if (opts.before && !Number.isNaN(opts.before.getTime())) {
-    params.push(opts.before.toISOString())
-    where.push(`created_at < $${params.length}`)
-  }
-  if (opts.quoteId) {
-    params.push(opts.quoteId)
-    where.push(`quote_id = $${params.length}`)
-  }
-  return query<Post>(
-    `SELECT ${COLUMNS} FROM posts WHERE ${where.join(" AND ")} ORDER BY created_at DESC LIMIT $1`,
-    params,
-  )
 }
 
 export async function getPost(id: string): Promise<Post | null> {

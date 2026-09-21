@@ -25,17 +25,19 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS posts (
     id            text PRIMARY KEY,
     body          text NOT NULL,
-    quote_id      text,
     word_count    integer NOT NULL,
-    write_seconds integer NOT NULL,
-    pause_count   integer NOT NULL,
-    clock_seconds integer NOT NULL,
     author_hash   text NOT NULL,
     report_hashes text[] NOT NULL DEFAULT '{}',
     hidden        boolean NOT NULL DEFAULT false,
     created_at    timestamptz NOT NULL DEFAULT now(),
     expires_at    timestamptz NOT NULL DEFAULT now() + interval '30 days'
   )`,
+  // Columns from the days when the site had a clock and a weekly quote. Harmless on a fresh table.
+  `ALTER TABLE posts
+     DROP COLUMN IF EXISTS quote_id,
+     DROP COLUMN IF EXISTS write_seconds,
+     DROP COLUMN IF EXISTS pause_count,
+     DROP COLUMN IF EXISTS clock_seconds`,
   `CREATE INDEX IF NOT EXISTS posts_by_time ON posts (created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS posts_by_author ON posts (author_hash, created_at DESC)`,
 ]

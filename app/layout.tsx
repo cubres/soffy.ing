@@ -16,8 +16,7 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://soffy.ing"),
   title: { default: "soffy.ing", template: "%s · soffy.ing" },
-  description:
-    "sophia, as a verb. a place to write where text is the only thing that exists: no names, no numbers, no images, no memory.",
+  description: "sophia, as a verb. a place to write where text is the only thing that exists.",
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -32,7 +31,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Nav />
         </header>
         <main>{children}</main>
-        <footer className="muted">no names · no numbers · no images · no memory</footer>
       </body>
     </html>
   )

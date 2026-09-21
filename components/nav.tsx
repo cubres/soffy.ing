@@ -4,8 +4,6 @@ import { usePathname } from "next/navigation"
 
 const ITEMS: [string, string][] = [
   ["/", "write"],
-  ["/read", "read"],
-  ["/quote", "quote"],
   ["/about", "about"],
 ]
 

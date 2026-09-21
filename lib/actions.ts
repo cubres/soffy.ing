@@ -6,16 +6,14 @@ import { adminKeyOk } from "./admin"
 import { isNoDatabase } from "./db"
 import { requesterHash } from "./hash"
 import { isId } from "./ids"
-import { createPost, deletePost, reportPost, setHidden, type Draft } from "./posts"
+import { createPost, deletePost, reportPost, setHidden } from "./posts"
 
 export type SubmitResult = { ok: true; id: string; expiresAt: string } | { ok: false; error: string }
 
-export async function submitPost(draft: Draft): Promise<SubmitResult> {
+export async function submitPost(body: string): Promise<SubmitResult> {
   try {
-    const result = await createPost(draft, await requesterHash())
+    const result = await createPost(body, await requesterHash())
     if (!result.ok) return result
-    revalidatePath("/read")
-    revalidatePath("/quote")
     return { ok: true, id: result.id, expiresAt: result.expiresAt.toISOString() }
   } catch (error) {
     if (isNoDatabase(error)) return { ok: false, error: "the site is not connected to its database yet. save your text; it cannot be posted today." }
@@ -40,8 +38,6 @@ export async function adminAct(formData: FormData): Promise<void> {
   if (act === "hide") await setHidden(id, true)
   else if (act === "unhide") await setHidden(id, false)
   else if (act === "delete") await deletePost(id)
-  revalidatePath("/read")
-  revalidatePath("/quote")
   revalidatePath(`/p/${id}`)
   redirect(`/admin?key=${encodeURIComponent(key)}`)
 }
