@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { submitPost, type SubmitResult } from "@/lib/actions"
 import { PLACEHOLDERS } from "@/lib/placeholders"
 import { fmtDate } from "@/lib/time"
@@ -18,32 +17,19 @@ function countWords(text: string): number {
 
 export default function Editor({ limits }: Props) {
   const [text, setText] = useState("")
-  const [note, setNote] = useState<string | null>(null)
   const [stage, setStage] = useState<Stage>("idle")
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ id: string; expiresAt: string } | null>(null)
   const [placeholder, setPlaceholder] = useState("")
-  const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     setPlaceholder(PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)])
   }, [])
 
-  function flash(message: string) {
-    setNote(message)
-    if (noteTimer.current) clearTimeout(noteTimer.current)
-    noteTimer.current = setTimeout(() => setNote(null), 2500)
-  }
-
   function onChange(value: string) {
     setText(value)
     setStage((s) => (s === "posting" ? s : "idle"))
     setError(null)
-  }
-
-  function refuse(e: React.SyntheticEvent) {
-    e.preventDefault()
-    flash("paste refused. everything here is typed.")
   }
 
   function save() {
@@ -85,8 +71,6 @@ export default function Editor({ limits }: Props) {
         value={text}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        onPaste={refuse}
-        onDrop={refuse}
         spellCheck
         autoFocus
         aria-label="write"
@@ -95,7 +79,6 @@ export default function Editor({ limits }: Props) {
       <p className="between">
         <span className="muted">
           {words} {words === 1 ? "word" : "words"}
-          {note && <span className="loss"> · {note}</span>}
         </span>
         {hasText && stage === "idle" && (
           <span className="row">

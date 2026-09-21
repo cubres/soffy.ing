@@ -4,7 +4,7 @@ import { newId } from "./ids"
 export const LIMITS = {
   minWords: 40,
   maxChars: 40_000,
-  lifeDays: 30,
+  lifeDays: 90,
   postsPerDay: 5,
   minutesBetween: 10,
   reportsToHide: 3,

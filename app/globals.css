@@ -42,10 +42,10 @@ main {
 
 header {
   padding-top: 72px;
+  padding-bottom: var(--gap);
 }
 
-header h1,
-header p {
+header h1 {
   margin: 0;
 }
 
@@ -53,60 +53,19 @@ header h1 a {
   text-decoration: none;
 }
 
-nav {
-  margin: var(--line) 0 var(--gap);
-}
-
-nav a,
-nav b {
-  margin-right: 3ch;
-  font-weight: 400;
-}
-
-nav a {
-  color: var(--muted);
-  text-decoration: none;
-}
-
-nav a:hover {
-  color: var(--fg);
-}
-
 main {
   padding-bottom: 72px;
 }
 
-h1,
-h2,
-h3 {
+h1 {
   font-size: inherit;
   line-height: inherit;
   font-weight: 700;
-  margin: var(--gap) 0 var(--line);
-}
-
-main > h2:first-child {
-  margin-top: 0;
 }
 
 p,
-ul,
-ol,
-blockquote,
-pre,
 form {
   margin: 0 0 var(--line);
-}
-
-ul,
-ol {
-  padding-left: 3ch;
-}
-
-blockquote {
-  padding-left: 2ch;
-  border-left: 2px solid var(--faint);
-  font-style: italic;
 }
 
 a {
@@ -134,6 +93,7 @@ strong {
   color: var(--loss);
 }
 
+/* Separates entries in the admin list, the only page that lists anything. */
 .sep {
   color: var(--faint);
   margin: var(--gap) 0;
@@ -243,5 +203,6 @@ textarea::placeholder {
   }
   header {
     padding-top: 40px;
+    padding-bottom: var(--gap);
   }
 }

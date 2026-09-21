@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS posts (
   report_hashes text[] NOT NULL DEFAULT '{}',     -- daily hashes of reporters; three of them hide the post
   hidden        boolean NOT NULL DEFAULT false,
   created_at    timestamptz NOT NULL DEFAULT now(),
-  expires_at    timestamptz NOT NULL DEFAULT now() + interval '30 days'
+  expires_at    timestamptz NOT NULL DEFAULT now() + interval '90 days'
 );
 
 CREATE INDEX IF NOT EXISTS posts_by_time   ON posts (created_at DESC);

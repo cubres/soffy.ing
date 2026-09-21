@@ -4,9 +4,9 @@
 
 A place to write where text is the only thing that exists. No names, no numbers, no images, no memory.
 
-You write. If you want, you post it, anonymously, and get an address you can give to anyone. Thirty days later it is gone.
+You write. If you want, you post it, anonymously, and get an address you can give to anyone. Ninety days later it is gone.
 
-The argument for all of this is on the site itself, at [soffy.ing/about](https://soffy.ing/about). This file is about how it is built.
+The site is one page. This file is about how it is built.
 
 ## the four refusals, in code
 
@@ -19,15 +19,15 @@ The argument for all of this is on the site itself, at [soffy.ing/about](https:/
 
 ## the shape of it
 
-- **Next.js 15**, App Router, TypeScript. Server components everywhere except the editor and the nav.
+- **Next.js 15**, App Router, TypeScript. Server components everywhere except the editor.
 - **One CSS file**, `app/globals.css`. One typeface, JetBrains Mono, self-hosted at build. Every control is a word; the only colour is red, and it only means loss.
 - **One table**, `posts`. See `schema.sql`. Created automatically on first use.
 - **Five runtime dependencies**: `next`, `react`, `react-dom`, `postgres` (production) and `@electric-sql/pglite` (local development, an in-process Postgres so the site runs with zero setup).
 - **No API routes.** Posting, reporting and moderation are server actions in `lib/actions.ts`.
 
 ```
-app/            pages: / (write), /p/[id], /about, /admin, robots.txt
-components/     editor (client), nav (client), post view
+app/            pages: / (write), /p/[id], /admin, robots.txt
+components/     editor (client), post view
 lib/            db adapter, posts (all SQL), hash, ids, actions
 schema.sql      the one table, for reading
 ```
@@ -65,7 +65,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ## moderation without accounts
 
-- The cost of posting is typing: forty words minimum, no paste.
+- The cost of posting is length: forty words minimum.
 - Each visitor gets a hash of `address | date | salt`, never the address itself, and it changes daily. One post per ten minutes and five per day per hash.
 - Anyone can report a post from its page. Three reports from three different daily hashes hide it.
 - `/admin?key=…` lists everything, including hidden and expired posts, with hide, unhide and delete. Keep the key out of the browser history of shared machines; the site sets no cookies on principle, so the key travels in the URL.
@@ -75,4 +75,4 @@ All the limits are in one place, `LIMITS` in `lib/posts.ts`.
 
 ## what is deliberately missing
 
-A feed, replies, likes, follows, search, an RSS feed, an API, an archive, a timer, rich text, file import, dark mode, a second typeface, a logo, a grid. Each one was left out on purpose. The reasons are on the about page.
+A feed, replies, likes, follows, search, an RSS feed, an API, an archive, a timer, an about page, rich text, file import, dark mode, a second typeface, a logo, a grid. Each one was left out on purpose.

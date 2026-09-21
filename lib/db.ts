@@ -30,7 +30,7 @@ const SCHEMA = [
     report_hashes text[] NOT NULL DEFAULT '{}',
     hidden        boolean NOT NULL DEFAULT false,
     created_at    timestamptz NOT NULL DEFAULT now(),
-    expires_at    timestamptz NOT NULL DEFAULT now() + interval '30 days'
+    expires_at    timestamptz NOT NULL DEFAULT now() + interval '90 days'
   )`,
   // Columns from the days when the site had a clock and a weekly quote. Harmless on a fresh table.
   `ALTER TABLE posts
@@ -38,6 +38,9 @@ const SCHEMA = [
      DROP COLUMN IF EXISTS write_seconds,
      DROP COLUMN IF EXISTS pause_count,
      DROP COLUMN IF EXISTS clock_seconds`,
+  // The table was first created when posts lived thirty days. Inserts set the date explicitly,
+  // but keep the column's own default honest too.
+  `ALTER TABLE posts ALTER COLUMN expires_at SET DEFAULT now() + interval '90 days'`,
   `CREATE INDEX IF NOT EXISTS posts_by_time ON posts (created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS posts_by_author ON posts (author_hash, created_at DESC)`,
 ]
