@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { submitPost, type SubmitResult } from "@/lib/actions"
+import { textLang } from "@/lib/lang"
 import { fmtDate } from "@/lib/time"
 
 interface Props {
@@ -68,6 +69,7 @@ export default function Editor({ limits }: Props) {
         value={text}
         placeholder={PLACEHOLDER}
         onChange={(e) => onChange(e.target.value)}
+        lang={textLang(text)}
         spellCheck
         autoFocus
         aria-label="write"
