@@ -1,4 +1,4 @@
-/* The whole design. One typeface, black on white, and words. The only colour is red, and it only ever means loss. */
+/* The whole design. One typeface, black on white, and words. The only color is red, and it only ever means loss. */
 
 :root {
   --fg: #1a1a1a;
@@ -122,7 +122,7 @@ article {
   margin: 0;
 }
 
-/* An action is a word. Grey until you mean it. */
+/* An action is a word. Gray until you mean it. */
 button.t {
   all: unset;
   cursor: pointer;

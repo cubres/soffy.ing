@@ -34,7 +34,7 @@ function isAllowed(ch: string): boolean {
   return code >= 32 && code !== 127
 }
 
-// Normalise line endings, drop control characters, trim trailing spaces and runaway blank lines.
+// Normalize line endings, drop control characters, trim trailing spaces and runaway blank lines.
 export function cleanBody(raw: string): string {
   return Array.from(raw.replace(/\r\n?/g, "\n"))
     .filter(isAllowed)
@@ -53,7 +53,7 @@ export async function createPost(rawBody: string, authorHash: string): Promise<C
   const words = countWords(body)
   if (!body) return fail("there is nothing to post.")
   if (body.length > LIMITS.maxChars)
-    return fail(`too long: the limit is ${LIMITS.maxChars.toLocaleString("en-GB")} characters.`)
+    return fail(`too long: the limit is ${LIMITS.maxChars.toLocaleString("en-US")} characters.`)
   if (words < LIMITS.minWords) return fail(`too short: at least ${LIMITS.minWords} words.`)
 
   const [counts] = await query<{ recent: string | number; today: string | number }>(

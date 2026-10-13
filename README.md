@@ -20,7 +20,7 @@ The site is one page. This file is about how it is built.
 ## the shape of it
 
 - **Next.js 15**, App Router, TypeScript. Server components everywhere except the editor.
-- **One CSS file**, `app/globals.css`. One typeface, JetBrains Mono, self-hosted at build. Every control is a word; the only colour is red, and it only means loss.
+- **One CSS file**, `app/globals.css`. One typeface, JetBrains Mono, self-hosted at build. Every control is a word; the only color is red, and it only means loss.
 - **One table**, `posts`. See `schema.sql`. Created automatically on first use.
 - **Five runtime dependencies**: `next`, `react`, `react-dom`, `postgres` (production) and `@electric-sql/pglite` (local development, an in-process Postgres so the site runs with zero setup).
 - **No API routes.** Posting, reporting and moderation are server actions in `lib/actions.ts`.

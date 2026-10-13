@@ -3,7 +3,7 @@ import { headers } from "next/headers"
 
 // The only thing the site ever derives from who you are: a hash of your address,
 // salted with today's date and a secret. It cannot be reversed, and it changes every day,
-// so it can stop one person flooding the site today without being able to recognise them tomorrow.
+// so it can stop one person flooding the site today without being able to recognize them tomorrow.
 export async function requesterHash(): Promise<string> {
   const h = await headers()
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || "0.0.0.0"

@@ -6,7 +6,7 @@ export function fmtDate(d: Date | string): string {
 }
 
 export function fmtWords(n: number): string {
-  return `${n.toLocaleString("en-GB")} ${n === 1 ? "word" : "words"}`
+  return `${n.toLocaleString("en-US")} ${n === 1 ? "word" : "words"}`
 }
 
 export function plural(n: number, word: string): string {
