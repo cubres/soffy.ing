@@ -1,14 +1,15 @@
 import type { Metadata } from "next"
 import type React from "react"
-import { JetBrains_Mono } from "next/font/google"
+import { Source_Serif_4 } from "next/font/google"
 import "./globals.css"
 
 // Self-hosted at build time. The browser never talks to a font server.
-const mono = JetBrains_Mono({
+// Source Serif 4 is the typeface Medium sets its articles in; the optical-size axis keeps it crisp at text sizes.
+const serif = Source_Serif_4({
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext", "greek"],
-  weight: ["400", "700"],
   style: ["normal", "italic"],
-  variable: "--font-mono",
+  axes: ["opsz"],
+  variable: "--font-serif",
   display: "swap",
 })
 
@@ -20,12 +21,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en-US" className={mono.variable}>
+    <html lang="en-US" className={serif.variable}>
       <body>
         <header>
           <h1>
             <a href="/">soffy.ing</a>
           </h1>
+          <p className="muted">
+            <a href="https://philo.soffy.ing">See my writing →</a>
+          </p>
         </header>
         <main>{children}</main>
       </body>

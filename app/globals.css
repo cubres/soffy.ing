@@ -1,14 +1,15 @@
-/* The whole design. One typeface, black on white, and words. The only color is red, and it only ever means loss. */
+/* The whole design. One typeface, near-black on white, and words. The only color is red, and it only ever means loss.
+   Set like a Medium article: Source Serif 4 at 20px on a 32px line, 680px wide. */
 
 :root {
-  --fg: #1a1a1a;
-  --muted: #8a8a8a;
-  --faint: #d4d4d4;
+  --fg: #242424;
+  --muted: #6b6b6b;
+  --faint: #d9d9d9;
   --bg: #ffffff;
   --loss: #b3261e;
-  --line: 26px;
-  --gap: 52px;
-  --measure: 64ch;
+  --line: 32px;
+  --gap: 48px;
+  --measure: 680px;
 }
 
 * {
@@ -24,10 +25,10 @@ body {
   min-height: 100vh;
   color: var(--fg);
   background: var(--bg);
-  font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  font-size: 16px;
+  font-family: var(--font-serif), Charter, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-size: 20px;
   line-height: var(--line);
-  font-variant-ligatures: none;
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -47,6 +48,11 @@ header {
 
 header h1 {
   margin: 0;
+}
+
+/* The one line under the name: the way to the writing. */
+header p {
+  margin: 4px 0 0;
 }
 
 header h1 a {
@@ -191,11 +197,11 @@ textarea::placeholder {
 
 @media (max-width: 520px) {
   :root {
-    --line: 24px;
+    --line: 30px;
     --gap: 40px;
   }
   body {
-    font-size: 15px;
+    font-size: 18px;
   }
   header,
   main {
