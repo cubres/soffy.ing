@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import type React from "react"
 import { Source_Serif_4 } from "next/font/google"
 import "./globals.css"
+import Offline from "@/components/offline"
 
 // Self-hosted at build time. The browser never talks to a font server.
 // Source Serif 4 is the typeface Medium sets its articles in; the optical-size axis keeps it crisp at text sizes.
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </p>
         </header>
         <main>{children}</main>
+        <Offline />
       </body>
     </html>
   )

@@ -42,7 +42,12 @@ export default function Editor({ limits }: Props) {
   async function post() {
     setStage("posting")
     setError(null)
-    const r: SubmitResult = await submitPost(text)
+    let r: SubmitResult
+    try {
+      r = await submitPost(text)
+    } catch {
+      r = { ok: false, error: navigator.onLine ? "could not reach the server. try again." : "you are offline. save it, or post when you are back." }
+    }
     if (r.ok) {
       setResult({ id: r.id, expiresAt: r.expiresAt })
       setStage("done")

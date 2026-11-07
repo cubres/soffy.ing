@@ -73,6 +73,10 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 All the limits are in one place, `LIMITS` in `lib/posts.ts`.
 
+## offline
+
+`public/sw.js` is a service worker that keeps the writing page (`/`) and the files it needs in the browser, so the site opens without a connection once it has been visited online. Pages always come from the network first; offline, `/` opens the kept copy and any other address redirects to it. Posts are never stored in the browser. Posting offline says so instead of failing silently; `save` works offline as always. The worker is registered only in production builds (`components/offline.tsx`).
+
 ## what is deliberately missing
 
 A feed, replies, likes, follows, search, an RSS feed, an API, an archive, a timer, an about page, rich text, file import, dark mode, a second typeface, a logo, a grid. Each one was left out on purpose.
