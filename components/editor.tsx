@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { submitPost, type SubmitResult } from "@/lib/actions"
 import { textLang } from "@/lib/lang"
 import { fmtDate } from "@/lib/time"
@@ -23,6 +23,22 @@ export default function Editor({ limits }: Props) {
   const [stage, setStage] = useState<Stage>("idle")
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ id: string; expiresAt: string } | null>(null)
+  const area = useRef<HTMLTextAreaElement>(null)
+
+  // The page grows with the writing, so the whole text is always on it and nothing scrolls inside a box.
+  useLayoutEffect(() => {
+    const el = area.current
+    if (!el) return
+    const fit = () => {
+      const y = window.scrollY
+      el.style.height = "auto"
+      el.style.height = `${el.scrollHeight}px`
+      window.scrollTo(window.scrollX, y)
+    }
+    fit()
+    window.addEventListener("resize", fit)
+    return () => window.removeEventListener("resize", fit)
+  }, [text])
 
   function onChange(value: string) {
     setText(value)
@@ -71,6 +87,7 @@ export default function Editor({ limits }: Props) {
   return (
     <>
       <textarea
+        ref={area}
         value={text}
         placeholder={PLACEHOLDER}
         onChange={(e) => onChange(e.target.value)}

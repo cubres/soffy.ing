@@ -1,5 +1,5 @@
 /* The whole design. One typeface, near-black on white, and words. The only color is red, and it only ever means loss.
-   Set like a Medium article: Source Serif 4 at 20px on a 32px line, 680px wide. */
+   Set like a Medium article: Source Serif 4 at 20px on a 32px line, 680px wide plus 5% of the screen. */
 
 :root {
   --fg: #242424;
@@ -9,7 +9,7 @@
   --loss: #b3261e;
   --line: 32px;
   --gap: 48px;
-  --measure: 680px;
+  --measure: calc(680px + 5vw);
 }
 
 * {
@@ -177,6 +177,7 @@ textarea {
   border: 0;
   outline: 0;
   resize: none;
+  overflow: hidden;
   background: transparent;
   color: inherit;
   font: inherit;
