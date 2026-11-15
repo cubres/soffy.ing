@@ -1,8 +1,11 @@
 // The writing page, kept in this browser so it opens without a connection.
 // Only the page at "/" and the files it needs are kept. Posts are never stored:
 // a post lives on the server for ninety days and nowhere else.
+// The spelling and grammar checker is kept too, so it works offline as well.
 
 const CACHE = "soffy-offline-v1"
+// Files the page loads later, not from its HTML: the spelling and grammar checker and its WebAssembly.
+const LAZY = "soffy-lazy-v1"
 const PAGE = "/"
 
 // Every same-origin file the page asks for: scripts, the stylesheet, the fonts, the icon.
@@ -33,6 +36,23 @@ async function refresh(response) {
   }
 }
 
+// Keep a file fetched after the page loaded. The checker's WebAssembly is about 20 MB,
+// so a new one replaces the old instead of piling up.
+async function fetchLazy(req, url) {
+  const r = await fetch(req)
+  if (!r.ok) return r
+  const copy = r.clone()
+  const keep = (async () => {
+    const lazy = await caches.open(LAZY)
+    if (url.pathname.endsWith(".wasm")) {
+      for (const old of await lazy.keys()) if (old.url.endsWith(".wasm")) await lazy.delete(old)
+    }
+    await lazy.put(req, copy)
+  })()
+  keep.catch(() => {})
+  return r
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     fetch(PAGE, { cache: "no-store" })
@@ -45,7 +65,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((names) => Promise.all(names.filter((n) => n !== CACHE).map((n) => caches.delete(n))))
+      .then((names) => Promise.all(names.filter((n) => n !== CACHE && n !== LAZY).map((n) => caches.delete(n))))
       .then(() => self.clients.claim()),
   )
 })
@@ -76,6 +96,6 @@ self.addEventListener("fetch", (event) => {
 
   // Build files have content-hashed names and never change: the kept copy is as good as the network's.
   if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icon")) {
-    event.respondWith(caches.match(req).then((hit) => hit || fetch(req)))
+    event.respondWith(caches.match(req).then((hit) => hit || fetchLazy(req, url)))
   }
 })

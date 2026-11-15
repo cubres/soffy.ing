@@ -22,7 +22,7 @@ The site is one page. This file is about how it is built.
 - **Next.js 15**, App Router, TypeScript. Server components everywhere except the editor.
 - **One CSS file**, `app/globals.css`. One typeface, JetBrains Mono, self-hosted at build. Every control is a word; the only color is red, and it only means loss.
 - **One table**, `posts`. See `schema.sql`. Created automatically on first use.
-- **Five runtime dependencies**: `next`, `react`, `react-dom`, `postgres` (production) and `@electric-sql/pglite` (local development, an in-process Postgres so the site runs with zero setup).
+- **Six runtime dependencies**: `next`, `react`, `react-dom`, `postgres` (production), `@electric-sql/pglite` (local development, an in-process Postgres so the site runs with zero setup) and `harper.js` (the spelling and grammar checker).
 - **No API routes.** Posting, reporting and moderation are server actions in `lib/actions.ts`.
 
 ```
@@ -72,6 +72,12 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 - Expired posts are invisible immediately and physically deleted a day later, on the next write.
 
 All the limits are in one place, `LIMITS` in `lib/posts.ts`.
+
+## spelling and grammar, on the device
+
+English text is checked as you type by [Harper](https://github.com/automattic/harper), a grammar checker compiled to WebAssembly and served by the site itself. It runs in a worker in the browser; the text never leaves the page, there is no API and no model. On top of Harper, `lib/grammar/rules.ts` adds rules it lacks: the preposition a word demands (*depend on*, *consist of*, *responsible for*), verbs after modals (*must go*, *can go*), pronoun case (*between you and me*), agreement with *everyone*, and mix-ups such as *then*/*than*.
+
+Mistakes get a gray underline (wavy for spelling, dotted for grammar). Click one for the suggestions: pick one, `ignore` it, or `learn word`, which adds it to a word list kept only in this browser's `localStorage`. Bulgarian text is left to the browser's own spellcheck. The checker is about 20 MB and loads after the page; the service worker keeps it, so it works offline too.
 
 ## offline
 
