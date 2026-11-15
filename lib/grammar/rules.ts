@@ -50,7 +50,6 @@ const PREPOSITIONS: [string, string, string][] = [
   ["rely|relies|relied|relying|reliant|reliance", "on", "at|of|from|with|to"],
   ["consist|consists|consisted|consisting", "of", "from|with|by"],
   ["responsible", "for", "of|about"],
-  ["capable|incapable", "of", "to"],
   ["afraid", "of", "from"],
   ["proud", "of", "on|from|with"],
   ["similar|dissimilar", "to", "with|than"],
@@ -74,9 +73,14 @@ const PREPOSITIONS: [string, string, string][] = [
   ["believe|believes|believed|believing", "in", "on|at"],
 ]
 
+// Set phrases that start with a preposition but belong to the rest of the sentence:
+// "insisting at the same time", "not believing at all", "depends in part on".
+const SET_PHRASE =
+  "at all|at the same time|at least|at first|at once|at times|at last|at heart|at most|at best|at worst|at that|in part|in turn|in fact|in general|in particular|in short|in a way|in some way|of course|for example|for instance|for now|for good|for a while|to some extent|to date|with time"
+
 function prepositions(text: string, out: Issue[]) {
   for (const [heads, right, wrongs] of PREPOSITIONS) {
-    const re = new RegExp(`\\b(${heads})\\s+(${wrongs})\\b`, "gid")
+    const re = new RegExp(`\\b(${heads})\\s+(?!(?:${SET_PHRASE})\\b)(${wrongs})\\b`, "gid")
     each(
       text,
       re,
@@ -330,5 +334,191 @@ export function extraRules(text: string): Issue[] {
   modals(text, out)
   pronouns(text, out)
   mixups(text, out)
+  habits(text, out)
   return out
+}
+
+// --- the mistakes this writer actually makes ------------------------------------
+// Taken from the corrections made to the diary on philo.soffy.ing: lie and lay,
+// near-homophones a spellchecker accepts, participles after "had", and a few idioms.
+
+const PARTICIPLE: Record<string, string> = {
+  came: "come", ran: "run", began: "begun", drank: "drunk", swam: "swum", sang: "sung", rang: "rung",
+  went: "gone", wrote: "written", took: "taken", ate: "eaten", gave: "given", saw: "seen", spoke: "spoken",
+  broke: "broken", chose: "chosen", drove: "driven", knew: "known", threw: "thrown", grew: "grown",
+  flew: "flown", stole: "stolen", froze: "frozen", fell: "fallen", woke: "woken", did: "done",
+  forgot: "forgotten", rode: "ridden", shook: "shaken", hid: "hidden", became: "become", beated: "beaten",
+}
+
+// The -ing form of a regular verb: produce → producing, lie → lying, go → going.
+function ing(verb: string): string {
+  const v = verb.toLowerCase()
+  if (v.endsWith("ing")) return v
+  if (v.endsWith("ie")) return v.slice(0, -2) + "ying"
+  if (v.endsWith("e") && !v.endsWith("ee") && v !== "be") return v.slice(0, -1) + "ing"
+  return v + "ing"
+}
+
+const ADVERB = "never|already|just|indeed|always|not|finally|also|ever|recently|all|really|truly|since|long|once|only|still|even"
+
+function habits(text: string, out: Issue[]) {
+  const push = (start: number, end: number, message: string, replacements: string[]) =>
+    out.push({ start, end, kind: "grammar", message, replacements })
+
+  // Lie (to recline): lie, lay, lain, lying. Lay (to put something down): lay, laid, laid, laying.
+  // Only when nothing is being put down: "laid down" followed by an object ("laid down the law") is fine.
+  const RECLINE =
+    "(?:down|back|awake|still|motionless|there|here|around|flat|in bed|on (?:the|my|his|her|their|our|your) (?:ground|floor|bed|grass|sand|couch|sofa|beach|back|side|stomach))"
+  const NOT_OBJECT = "(?!\\s+(?:the|a|an|his|her|their|my|our|your|its|some|this|that|these|those|arms|roots|rules|law|plans|foundations?)\\b)"
+  each(
+    text,
+    new RegExp(`\\b(?:(have|has|had|having)\\s+(?:(?:${ADVERB})\\s+)?)?(laying|lays|laid)\\s+(?=${RECLINE}\\b${NOT_OBJECT})`, "giud"),
+    (m) => {
+      const word = m[2]
+      const lower = word.toLowerCase()
+      const to = m[1] && lower === "laid" ? "lain" : lower === "laying" ? "lying" : lower === "lays" ? "lies" : "lay"
+      const start = groupStart(m, 2)
+      return {
+        start,
+        end: start + word.length,
+        kind: "grammar",
+        message: `To recline is “to lie” (lie, lay, lain, lying); “to lay” needs an object. Here: “${to}.”`,
+        replacements: [matchCase(word, to)],
+      }
+    },
+    out,
+  )
+
+  // "had indeed came" → "had indeed come": a participle after have, even with an adverb between.
+  each(
+    text,
+    new RegExp(`\\b(have|has|had|having|'ve)\\s+(?:(?:${ADVERB})\\s+)?(${Object.keys(PARTICIPLE).join("|")})\\b(?!-)`, "giud"),
+    (m) => {
+      const start = groupStart(m, 2)
+      const to = PARTICIPLE[m[2].toLowerCase()]
+      return { start, end: start + m[2].length, kind: "grammar", message: `After “${m[1].toLowerCase()},” the participle: “${to}.”`, replacements: [matchCase(m[2], to)] }
+    },
+    out,
+  )
+
+  // Breadth is width; breath is air. "God's breadth", "whose breadth", "catch my breadth".
+  each(
+    text,
+    /\b(?:my|your|his|her|its|our|their|whose|God's|God’s|a|one|last|deep|short|warm|held|hold|holding|catch|caught|out\s+of|under\s+(?:my|his|her|their)|with\s+(?:every|each))\s+(breadth)\b(?!\s+of\b)/giud,
+    (m) => {
+      const start = groupStart(m, 1)
+      push(start, start + m[1].length, "“Breadth” is width; air is “breath.”", [matchCase(m[1], "breath")])
+      return null
+    },
+    out,
+  )
+
+  // "passes though" → "passes through": after a verb of motion, it is the preposition.
+  each(
+    text,
+    /\b(?:pass|passes|passed|passing|go|goes|went|going|gone|walk|walks|walked|walking|run|runs|ran|running|look|looks|looked|looking|get|gets|got|getting|come|comes|came|coming|break|broke|broken|cut|cuts|flip|flipped|scroll|scrolled|sift|sifted|move|moves|moved|moving|travel|traveled|travelled|live|lived|living|sleep|slept|see|saw|seen|push|pushed|squeeze|squeezed|shine|shines|shone|flow|flows|flowed|fall|fell|fallen|misery|suffering)\s+(though)\b/giud,
+    (m) => {
+      const start = groupStart(m, 1)
+      push(start, start + 6, "“Though” means “although”; across or by means of is “through.”", [matchCase(m[1], "through")])
+      return null
+    },
+    out,
+  )
+
+  // Words a spellchecker accepts that are almost never what was meant in these contexts.
+  const nearMisses: [RegExp, string, string][] = [
+    [/\b(?:math|maths|mathematics|chess|science|programming|coding|physics|national|international|regional|school|such\s+a)\s+(completion)\b/giud, "competition", "Did you mean “competition”? A completion is a finishing."],
+    [/\b(?:constant|sensory|mental|intellectual|over|need\s+for|lack\s+of|craving|crave)\s+(simulation)\b/giud, "stimulation", "Did you mean “stimulation”?"],
+    [/\b(?:comforting|the|its|summer|body|burning|unbearable)\s+(hot)\s+(?:for|of|from|was|is|that)\b/giud, "heat", "“Hot” is the adjective; the noun is “heat.”"],
+  ]
+  for (const [re, to, message] of nearMisses) {
+    each(
+      text,
+      re,
+      (m) => {
+        const start = groupStart(m, 1)
+        push(start, start + m[1].length, message, [matchCase(m[1], to)])
+        return null
+      },
+      out,
+    )
+  }
+
+  // "how Nature looks like" → "what Nature looks like" (or "how Nature looks").
+  each(
+    text,
+    /\b(how)\s+((?:[\p{L}'’]+\s+){1,4}?)(look|looks|looked|looking|sound|sounds|sounded|seem|seems|seemed|feel|feels|felt)\s+like\b/giud,
+    (m) => {
+      const start = groupStart(m, 1)
+      push(start, start + 3, "Either “what … looks like” or “how … looks”, not both.", [matchCase(m[1], "what")])
+      return null
+    },
+    out,
+  )
+
+  const phrase = (re: RegExp, message: string, to: (m: RegExpExecArray) => string, group = 0) =>
+    each(
+      text,
+      re,
+      (m) => {
+        const start = group ? groupStart(m, group) : m.index
+        const len = m[group].length
+        push(start, start + len, message, [to(m)])
+        return null
+      },
+      out,
+    )
+
+  // "capable to produce" → "capable of producing"
+  phrase(
+    /\b(?:capable|incapable)\s+(to\s+([\p{L}]+))\b/giud,
+    "It is “capable of” followed by the -ing form.",
+    (m) => `of ${ing(m[2])}`,
+    1,
+  )
+  phrase(/\b(feel|feels|felt|feeling)\s+shame\s+of\b/giud, "The idiom is “ashamed of.”", (m) => `${m[1]} ashamed of`)
+  phrase(/\b(laugh|laughs|laughed|laughing)\s+(?=(?:me|him|her|them|us|you)\b)/giud, "You laugh at someone.", (m) => `${m[1]} at `)
+  phrase(
+    /\b(?:a|the|rigorous|formal|complete|valid|written|full)\s+proof\s+(to)\s+(?!the\s+contrary)(?=each|every|the|this|that|all|it|them|any)/giud,
+    "A proof is “of” (or “for”) a statement.",
+    () => "of",
+    1,
+  )
+  phrase(
+    /\b(?:necessary|sufficient|absolute|only|first|main|basic|essential|precondition|prerequisite)\s+condition\s+(to)\s+(?=everything|anything|all|any|my|our|its|this|that|the|every)/giud,
+    "A condition is “for” something.",
+    () => "for",
+    1,
+  )
+  // "if he would have found" → "if he had found"
+  phrase(
+    /\b[Ii]f\s+(?:I|you|he|she|it|we|they|[\p{Lu}][\p{L}]+|(?:my|his|her|their|our|the)\s+[\p{L}]+)\s+(would\s+have)\s+(?=[\p{L}]+(?:ed|en|wn|ne|ght|t)\b|been|found|made|had|said|told|known|seen|done|gone)/gud,
+    "In the “if” part, the past perfect: “had,” not “would have.”",
+    () => "had",
+    1,
+  )
+  // "I will too die" → "I too will die"
+  phrase(/\b(?:I|we|you|he|she|they|it)\s+(will\s+too)\s+(?=[\p{L}])/giud, "“Too” goes before “will”: “I too will …,” or “I, too, will ….”", () => "too will", 1)
+  phrase(/\b(emotionally\s+)?(mature)\s+(?=to\s+(?:have|be|do|know|understand|see|handle|realize|accept)\b)/giud, "Something is missing: “mature enough to.”", (m) => `${m[2]} enough`, 2)
+  phrase(/\b(woah)\b/giud, "The standard spelling is “whoa.”", (m) => matchCase(m[1], "whoa"), 1)
+  phrase(/\b(?:a\s+)?whole\s+(another)\b/giud, "It is “a whole other.”", () => "other", 1)
+  phrase(
+    /\b(?:anything|nothing|something|everything|anyone|anybody|someone|somebody|nobody|none|little)\s+(other\s+)(?=(?:a|an|the)\s)/giud,
+    "Missing “than”: “other than …”?",
+    () => "other than ",
+    1,
+  )
+
+  // A word typed twice as "It it". Harper finds repeats in the same case; a repeat meant
+  // for effect ("makes sympathy sympathy") is never capitalized differently.
+  each(
+    text,
+    /\b([\p{L}]+)\s+(\1)\b/giud,
+    (m) => {
+      if (m[1] === m[2]) return null
+      const start = groupStart(m, 2)
+      return { start: m.index + m[1].length, end: start + m[2].length, kind: "grammar", message: `“${m[1]}” twice.`, replacements: [""] }
+    },
+    out,
+  )
 }
